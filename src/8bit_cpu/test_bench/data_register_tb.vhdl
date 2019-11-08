@@ -85,7 +85,7 @@ begin
         ai_n <= '1';
 
         assert register_data = "10101010"
-            report "register copy failed" severity error;
+            report "register copy failed" severity failure;
 
         cpu_bus <= "ZZZZZZZZ";
         
@@ -94,7 +94,7 @@ begin
 
         wait for 1 ps;
         assert cpu_bus = "10101010"
-            report "register to cpu_bus failed" severity error;            
+            report "register to cpu_bus failed" severity failure;            
 
         wait for 10 ns;
         ao_n <= '1';
@@ -104,7 +104,7 @@ begin
         wait for 1 ps;
         clr <= '0';
         assert register_data = "00000000"
-            report "register reset failed" severity error;            
+            report "register reset failed" severity failure;            
 
         wait for 500 ns;
 

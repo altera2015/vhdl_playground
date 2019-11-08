@@ -1,0 +1,4 @@
+*.vcd
+*.cf
+gtkwave64/*
+????-mingw32-mcode/*
