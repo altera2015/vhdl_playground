@@ -38,18 +38,8 @@ architecture instruction_register_arch of instruction_register is
 begin
 
   ireg <= reg(7 downto 4);
-
-  process(io_n)
-  begin
-      if io_n = '0' then
-        -- cpu_bus <= reg;
-        cpu_bus <= "0000" & reg(3 downto 0);
-
-      else
-        cpu_bus <= "ZZZZZZZZ";
-      end if;
-  end process;
-
+  cpu_bus <= "ZZZZZZZZ" when io_n = '1' else "0000" & reg(3 downto 0);
+  
   process(clk,clr)
   begin
     if clr = '1' then

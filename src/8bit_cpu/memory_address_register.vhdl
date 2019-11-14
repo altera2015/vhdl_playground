@@ -19,7 +19,7 @@ entity mar_register is
     mi_n: in std_logic;
 
     -- CPU bus, by default high impedance
-    cpu_bus: in std_logic_vector(3 downto 0);
+    cpu_bus: in std_logic_vector(7 downto 0);
 
     -- Register Value
     address: out std_logic_vector(3 downto 0) := "0000"
@@ -39,7 +39,7 @@ begin
     elsif clr='0' and rising_edge(clk) then
 
         if mi_n = '0' then
-          address <= cpu_bus;
+          address <= cpu_bus(3 downto 0);
         end if;
       
     end if;

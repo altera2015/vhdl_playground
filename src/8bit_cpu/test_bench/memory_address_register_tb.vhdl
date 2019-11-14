@@ -29,7 +29,7 @@ architecture mar_register_tb_arch of mar_register_tb is
             mi_n: in std_logic;
         
             -- CPU bus, by default high impedance
-            cpu_bus: in std_logic_vector(3 downto 0);
+            cpu_bus: in std_logic_vector(7 downto 0);
         
             -- Register Value
             address: out std_logic_vector(3 downto 0) := "0000"        
@@ -65,7 +65,7 @@ begin
         clk => clk,    
         mi_n => mi_n,
         clr => clr,        
-        cpu_bus => cpu_bus(3 downto 0),
+        cpu_bus => cpu_bus,
         address => address_data
     );
 

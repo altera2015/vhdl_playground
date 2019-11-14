@@ -7,6 +7,7 @@ echo.
 
 echo [46;30m Building VHDL files... [0m
 %GHDL% -a --std=08 --workdir=work *.vhdl
+if errorlevel 1 GOTO ERR
 %GHDL% -a --std=08 --workdir=work test_bench\*.vhdl
 if errorlevel 1 GOTO ERR
 echo VHDL compiled.
@@ -31,7 +32,6 @@ echo [46;30m Testing ALU [0m
 if errorlevel 1 GOTO ERR
 echo ALU OK
 echo.
-
 
 
 echo [46;30m Testing RAM [0m

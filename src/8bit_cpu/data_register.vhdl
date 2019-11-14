@@ -33,14 +33,7 @@ end data_register;
 architecture data_register_arch of data_register is  
 begin
 
-  process(ao_n)
-  begin
-      if ao_n = '0' then
-        cpu_bus <= reg;
-      else
-        cpu_bus <= "ZZZZZZZZ";
-      end if;
-  end process;
+  cpu_bus <= "ZZZZZZZZ" when ao_n = '1' else reg;
 
   process(clk,clr)
   begin
