@@ -61,6 +61,15 @@ if errorlevel 1 GOTO ERR
 echo Output Register OK
 echo.
 
+
+echo [46;30m Control Logic Test Bench [0m
+%GHDL% --elab-run --std=08 --workdir=work control_logic_tb --stop-time=500ns --vcd=control_logic.vcd 
+if errorlevel 1 GOTO ERR
+echo Control Logic OK
+echo.
+
+
+
 echo [42;97m Build Succeeded [0m
 
 GOTO DONE
