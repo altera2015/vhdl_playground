@@ -29,9 +29,9 @@ entity control_logic is
     hlt: out std_logic;
     -- Memory address in
     mi_n: out std_logic;
-    -- Ram In
+    -- RAM In
     ri: out std_logic;
-    -- Ram Out
+    -- RAM Out
     ro_n: out std_logic;
     -- instruction register out
     io_n: out std_logic;
@@ -96,6 +96,8 @@ architecture control_logic_arch of control_logic is
     type microcode_steps is array(0 to 7) of bit_vector(15 downto 0);
     type microcode_array is array (0 to 15) of microcode_steps;
         
+    -- Microcode from 
+    -- https://github.com/beneater/eeprom-programmer/blob/master/microcode-eeprom-with-flags/microcode-eeprom-with-flags.ino
     constant microcode : microcode_array := (    
         (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
         (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CAI, C0,                       C0, C0, C0),      -- LDA

@@ -38,9 +38,9 @@ architecture control_logic_tb_arch of control_logic_tb is
             hlt: out std_logic;
             -- Memory address in
             mi_n: out std_logic;
-            -- Ram In
+            -- RAM In
             ri: out std_logic;
-            -- Ram Out
+            -- RAM Out
             ro_n: out std_logic;
             -- instruction register out
             io_n: out std_logic;
@@ -69,8 +69,7 @@ architecture control_logic_tb_arch of control_logic_tb is
             co_n: out std_logic;
             -- program counter load / aka jump
             j_n: out std_logic;
-            -- copy the bus value to the register (sync)
-            
+
             -- copy flags to flags register.
             fi_n: out std_logic
         
@@ -155,7 +154,7 @@ begin
         ----------
 
         assert hlt = '0'
-            report "htl" severity failure;        
+            report "hlt" severity failure;        
         assert mi_n = '0'
             report "mi_n" severity failure;                
         assert ri = '0'
@@ -192,7 +191,7 @@ begin
         wait for 10 ns;
 
         assert hlt = '0'
-            report "htl" severity failure;        
+            report "hlt" severity failure;        
         assert mi_n = '1'
             report "mi_n" severity failure;                
         assert ri = '0'
