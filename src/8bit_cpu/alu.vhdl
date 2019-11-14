@@ -33,7 +33,7 @@ entity alu is
 
 end alu;
 
-architecture behaviour of alu is
+architecture alu_arch of alu is
     signal temp : unsigned(8 downto 0);
 begin
 
@@ -47,4 +47,4 @@ begin
     cpu_bus <= "ZZZZZZZZ" when eo_n = '1' else
                result when eo_n = '0';
 
-end behaviour;
+end alu_arch;

@@ -23,7 +23,7 @@ entity local_ram is
   );
 end entity local_ram;
 
-architecture rtl of local_ram is
+architecture local_ram_arch of local_ram is
 
    type ram_type is array (0 to (2**address'length)-1) of std_logic_vector(data_in'range);
    signal ram : ram_type := (
@@ -59,4 +59,4 @@ begin
   data_out <= ram(to_integer(unsigned(address)));
   
 
-end architecture rtl;
+end architecture local_ram_arch;

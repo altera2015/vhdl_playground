@@ -9,7 +9,7 @@ entity data_register_tb is
 end data_register_tb;
 
 
-architecture behaviour of data_register_tb is  
+architecture data_register_tb_arch of data_register_tb is  
 
     component sim_clock
         port ( 
@@ -112,4 +112,4 @@ begin
 
 
 
-end behaviour;
+end data_register_tb_arch;

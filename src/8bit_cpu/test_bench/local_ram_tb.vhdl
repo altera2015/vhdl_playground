@@ -10,7 +10,7 @@ entity local_ram_tb is
 end local_ram_tb;
 
 
-architecture behaviour of local_ram_tb is  
+architecture local_ram_tb_arch of local_ram_tb is  
 
     component sim_clock
         port ( 
@@ -139,4 +139,4 @@ begin
 
 
 
-end behaviour;
+end local_ram_tb_arch;

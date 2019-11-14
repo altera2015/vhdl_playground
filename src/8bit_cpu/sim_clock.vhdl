@@ -9,7 +9,7 @@ entity sim_clock is
   );
 end sim_clock;
 
-architecture behaviour of sim_clock
+architecture sim_clock_arch of sim_clock
 is
   constant clk_period : time := 10 ns;
   signal clk_temp: std_logic := '0';
@@ -26,4 +26,4 @@ begin
   clk <= clk_temp when run = '1' else
          step;
 
-end behaviour;
+end sim_clock_arch;

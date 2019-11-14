@@ -30,7 +30,7 @@ entity data_register is
 
 end data_register;
 
-architecture behaviour of data_register is  
+architecture data_register_arch of data_register is  
 begin
 
   process(ao_n)
@@ -57,4 +57,4 @@ begin
 
   end process;
 
-end behaviour;
+end data_register_arch;

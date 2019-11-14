@@ -1,4 +1,4 @@
--- 8 bit data register Test Bench
+-- ALU Test Bench
 --
 -- Ron Bessems <rbessems@gmail.com>
 
@@ -10,7 +10,7 @@ entity alu_tb is
 end alu_tb;
 
 
-architecture behaviour of alu_tb is  
+architecture alu_tb_arch of alu_tb is  
 
     component alu
         port ( 
@@ -114,4 +114,4 @@ begin
 
 
 
-end behaviour;
+end alu_tb_arch;

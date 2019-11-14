@@ -34,7 +34,7 @@ entity instruction_register is
 
 end instruction_register;
 
-architecture behaviour of instruction_register is  
+architecture instruction_register_arch of instruction_register is  
 begin
 
   ireg <= reg(7 downto 4);
@@ -65,4 +65,4 @@ begin
 
   end process;
 
-end behaviour;
+end instruction_register_arch;

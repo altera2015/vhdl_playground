@@ -26,12 +26,26 @@ echo instruction register OK
 echo.
 
 
-echo [46;30m Testing ALU Register [0m
+echo [46;30m Testing ALU [0m
 %GHDL% --elab-run --std=08 --workdir=work alu_tb --stop-time=500ns --vcd=alu.vcd 
 if errorlevel 1 GOTO ERR
 echo ALU OK
 echo.
 
+
+
+echo [46;30m Testing RAM [0m
+%GHDL% --elab-run --std=08 --workdir=work local_ram_tb --stop-time=500ns --vcd=ram.vcd 
+if errorlevel 1 GOTO ERR
+echo RAM OK
+echo.
+
+
+echo [46;30m Testing Memory Address Register [0m
+%GHDL% --elab-run --std=08 --workdir=work mar_register_tb --stop-time=500ns --vcd=mar.vcd 
+if errorlevel 1 GOTO ERR
+echo Memory Address Register OK
+echo.
 
 
 echo [42;97m Build Succeeded [0m

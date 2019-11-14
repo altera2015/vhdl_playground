@@ -9,7 +9,7 @@ entity instruction_register_tb is
 end instruction_register_tb;
 
 
-architecture behaviour of instruction_register_tb is  
+architecture instruction_register_tb_arch of instruction_register_tb is  
 
     component sim_clock
         port ( 
@@ -121,4 +121,4 @@ begin
 
 
 
-end behaviour;
+end instruction_register_tb_arch;
