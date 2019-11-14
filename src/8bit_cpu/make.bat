@@ -48,6 +48,12 @@ echo Memory Address Register OK
 echo.
 
 
+echo [46;30m Program Counter [0m
+%GHDL% --elab-run --std=08 --workdir=work program_counter_tb --stop-time=500ns --vcd=pc.vcd 
+if errorlevel 1 GOTO ERR
+echo Program Counter OK
+echo.
+
 echo [42;97m Build Succeeded [0m
 
 GOTO DONE
