@@ -18,9 +18,7 @@ entity control_logic is
     reset_button: in std_logic := '0';
     carry_flag: in std_logic;
     zero_flag: in std_logic;
-
-    -- current microcode stage
-    stage: out unsigned(2 downto 0) := "000";
+    
 
     -- clear
     clr: out std_logic;
@@ -119,6 +117,7 @@ architecture control_logic_arch of control_logic is
 
     -- variable stages : microcode_stages;
     signal micro_flags: bit_vector(15 downto 0);
+    signal stage: unsigned(2 downto 0) := "000";
 begin
     
     micro_flags <= microcode(to_integer(unsigned(instruction_bus)))(to_integer(unsigned(stage)));

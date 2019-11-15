@@ -23,15 +23,15 @@ architecture local_ram_tb_arch of local_ram_tb is
 
     component local_ram
         port (
-            clk : in  std_logic;
-            -- write enable, write to memory when high and clk edge happens
-            we : in  std_logic;
+            clk : in  std_logic;  
+            -- output ram value on bus
+            ro_n: in std_logic;
+            -- read value from bus
+            ri : in  std_logic;
             -- address to write to
             address : in  std_logic_vector(3 downto 0);
-            -- data input    
-            data_in  : in std_logic_vector(7 downto 0);
             -- data output
-            data_out : out std_logic_vector(7 downto 0)
+            cpu_bus : inout std_logic_vector(7 downto 0)
         );
     end component;
 
@@ -67,9 +67,9 @@ architecture local_ram_tb_arch of local_ram_tb is
 
     for ram_0: local_ram use entity work.local_ram;
     
-    signal we: std_logic := '0';
-    signal data_out: std_logic_vector(7 downto 0);
-    signal data_in: std_logic_vector(7 downto 0);
+    signal ro_n: std_logic := '0';
+    signal ri: std_logic := '0';    
+    signal cpu_bus: std_logic_vector(7 downto 0);
     signal address: std_logic_vector(3 downto 0) := "0000";
 
 begin
@@ -85,39 +85,43 @@ begin
     
     ram_0: local_ram port map( 
         clk=>clk,
-        we=>we,
-        data_out=>data_out,
-        data_in=>data_in,
+        ro_n=>ro_n,
+        ri=>ri,
+        cpu_bus=>cpu_bus,
         address=>address
     );
 
     process        
     begin
 
-
         for i in test_vector'range loop
-            
-            data_in <= test_vector(i).value;
+        
+            ro_n <= '1';
+
+            cpu_bus <= test_vector(i).value;
             address <= test_vector(i).address;
-            we <= '1';
+            ri <= '1';
             
             wait for 1 ns;
             step_clock <= '1';
             wait for 1 ns;
             step_clock <= '0';
 
-            we <= '0';
+            ri <= '0';
+
+            cpu_bus <= "ZZZZZZZZ";
+            ro_n <= '0';
             
-            assert ( data_out = test_vector(i).value )                
+            assert ( cpu_bus = test_vector(i).value )                
                 report  "test_vector " & integer'image(i) & " write failed "                     
                 severity failure;
 
         end loop;
 
 
-        we <= '0';
+        ro_n <= '0';
         for i in test_vector'range loop
-                        
+            
             address <= test_vector(i).address;
                         
             wait for 1 ns;
@@ -125,7 +129,7 @@ begin
             wait for 1 ns;
             step_clock <= '0';
             
-            assert ( data_out = test_vector(i).value )                
+            assert ( cpu_bus = test_vector(i).value )                
                 report  "test_vector " & integer'image(i) & " read failed "                     
                 severity failure;
 

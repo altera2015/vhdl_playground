@@ -28,9 +28,7 @@ architecture control_logic_tb_arch of control_logic_tb is
             reset_button: in std_logic := '0';
             carry_flag: in std_logic;
             zero_flag: in std_logic;
-        
-            -- current microcode step
-            stage: out unsigned(2 downto 0);
+    
         
             -- clear
             clr: out std_logic;
@@ -89,8 +87,7 @@ architecture control_logic_tb_arch of control_logic_tb is
     signal reset_button: std_logic := '0';
     signal carry_flag: std_logic := '0';
     signal zero_flag: std_logic := '0';
-    
-    signal stage: unsigned(2 downto 0);    
+     
     signal clr: std_logic;
     signal hlt: std_logic;    
     signal mi_n: std_logic;    
@@ -125,7 +122,6 @@ begin
         reset_button => reset_button,
         carry_flag => carry_flag,
         zero_flag => zero_flag,
-        stage => stage,
         clr => clr,
         hlt => hlt,
         mi_n => mi_n,
