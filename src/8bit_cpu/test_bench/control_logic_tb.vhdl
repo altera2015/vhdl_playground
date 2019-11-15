@@ -4,6 +4,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity control_logic_tb is
 end control_logic_tb;
@@ -29,7 +30,7 @@ architecture control_logic_tb_arch of control_logic_tb is
             zero_flag: in std_logic;
         
             -- current microcode step
-            step: out std_logic_vector(2 downto 0);
+            stage: out unsigned(2 downto 0);
         
             -- clear
             clr: out std_logic;
@@ -89,7 +90,7 @@ architecture control_logic_tb_arch of control_logic_tb is
     signal carry_flag: std_logic := '0';
     signal zero_flag: std_logic := '0';
     
-    signal step: std_logic_vector(2 downto 0);    
+    signal stage: unsigned(2 downto 0);    
     signal clr: std_logic;
     signal hlt: std_logic;    
     signal mi_n: std_logic;    
@@ -124,7 +125,7 @@ begin
         reset_button => reset_button,
         carry_flag => carry_flag,
         zero_flag => zero_flag,
-        step => step,
+        stage => stage,
         clr => clr,
         hlt => hlt,
         mi_n => mi_n,

@@ -19,8 +19,8 @@ entity control_logic is
     carry_flag: in std_logic;
     zero_flag: in std_logic;
 
-    -- current microcode step
-    step: out std_logic_vector(2 downto 0) := "000";
+    -- current microcode stage
+    stage: out unsigned(2 downto 0) := "000";
 
     -- clear
     clr: out std_logic;
@@ -93,8 +93,8 @@ architecture control_logic_arch of control_logic is
     constant JC   : std_logic_vector(3 downto 0) := "0111";
     constant JZ   : std_logic_vector(3 downto 0) := "1000";
 
-    type microcode_steps is array(0 to 7) of bit_vector(15 downto 0);
-    type microcode_array is array (0 to 15) of microcode_steps;
+    type microcode_stages is array(0 to 7) of bit_vector(15 downto 0);
+    type microcode_array is array (0 to 15) of microcode_stages;
         
     -- Microcode from 
     -- https://github.com/beneater/eeprom-programmer/blob/master/microcode-eeprom-with-flags/microcode-eeprom-with-flags.ino
@@ -117,11 +117,11 @@ architecture control_logic_arch of control_logic is
         (CMI or CCO, CRO or CII or CCE, CHLT,       C0,         C0,                       C0, C0, C0)       -- HLT
     );
 
-    -- variable steps : microcode_steps;
+    -- variable stages : microcode_stages;
     signal micro_flags: bit_vector(15 downto 0);
 begin
     
-    micro_flags <= microcode(to_integer(unsigned(instruction_bus)))(to_integer(unsigned(step)));
+    micro_flags <= microcode(to_integer(unsigned(instruction_bus)))(to_integer(unsigned(stage)));
 
     hlt  <= to_stdulogic (micro_flags(15));
     mi_n <= not to_stdulogic (micro_flags(14));
@@ -139,8 +139,8 @@ begin
     co_n <= not to_stdulogic (micro_flags(2));
 
     -- Conditional jumps here for instruction JC and JZ
-    j_n <= '0' when (step = "0010") and (instruction_bus = JC) and carry_flag = '1' else
-           '0' when (step = "0010") and (instruction_bus = JZ) and zero_flag = '1' else
+    j_n <= '0' when (stage = "0010") and (instruction_bus = JC) and carry_flag = '1' else
+           '0' when (stage = "0010") and (instruction_bus = JZ) and zero_flag = '1' else
            not to_stdulogic(micro_flags(1));
     
     fi_n <= not to_stdulogic (micro_flags(0));
@@ -150,9 +150,9 @@ begin
     process(clk, clr)
     begin
         if clr = '1' then
-            step <= "000";
+            stage <= "000";
         elsif clr = '0' and falling_edge(clk) then
-            step <= std_logic_vector(unsigned(step) + 1);
+            stage <= stage + 1;
         end if;
     end process;
 
