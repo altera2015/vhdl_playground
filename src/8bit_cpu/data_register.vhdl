@@ -24,7 +24,7 @@ entity data_register is
     cpu_bus: inout std_logic_vector(7 downto 0);
 
     -- Register Value
-    reg: out std_logic_vector(7 downto 0) := "00000000"
+    reg: out std_logic_vector(7 downto 0)
 
   );
 

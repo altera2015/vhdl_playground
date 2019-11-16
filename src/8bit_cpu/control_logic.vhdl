@@ -14,14 +14,14 @@ entity control_logic is
   port ( 
     clk: in std_logic;
     
-    instruction_bus: in std_logic_vector(3 downto 0);
-    reset_button: in std_logic := '0';
+    instruction_bus: in unsigned(3 downto 0);
+
     carry_flag: in std_logic;
     zero_flag: in std_logic;
     
 
     -- clear
-    clr: out std_logic;
+    clr: in std_logic;
 
     -- halt the clock
     hlt: out std_logic;
@@ -88,8 +88,8 @@ architecture control_logic_arch of control_logic is
     constant C0   : bit_vector(15 downto 0) := "0000000000000000"; -- NOP
 
     -- Instructions
-    constant JC   : std_logic_vector(3 downto 0) := "0111";
-    constant JZ   : std_logic_vector(3 downto 0) := "1000";
+    constant JC   : unsigned(3 downto 0) := "0111";
+    constant JZ   : unsigned(3 downto 0) := "1000";
 
     type microcode_stages is array(0 to 7) of bit_vector(15 downto 0);
     type microcode_array is array (0 to 15) of microcode_stages;
@@ -97,29 +97,29 @@ architecture control_logic_arch of control_logic is
     -- Microcode from 
     -- https://github.com/beneater/eeprom-programmer/blob/master/microcode-eeprom-with-flags/microcode-eeprom-with-flags.ino
     constant microcode : microcode_array := (    
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CAI, C0,                       C0, C0, C0),      -- LDA
-        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CBI, CEO or CAI or CFI,        C0, C0, C0),      -- ADD
-        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CBI, CEO or CAI or CSU or CFI, C0, C0, C0),      -- SUB
-        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CAO or CRI, C0,                       C0, C0, C0),      -- STA
-        (CMI or CCO, CRO or CII or CCE, CIO or CAI, C0,         C0,                       C0, C0, C0),      -- LDI
-        (CMI or CCO, CRO or CII or CCE, CIO or CJ,  C0,         C0,                       C0, C0, C0),      -- JMP
-        (CMI or CCO, CRO or CII or CCE, CIO,        C0,         C0,                       C0, C0, C0),      -- JC
-        (CMI or CCO, CRO or CII or CCE, CIO,        C0,         C0,                       C0, C0, C0),      -- JZ
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP
-        (CMI or CCO, CRO or CII or CCE, CAO or COI, C0,         C0,                       C0, C0, C0),      -- OUT
-        (CMI or CCO, CRO or CII or CCE, CHLT,       C0,         C0,                       C0, C0, C0)       -- HLT
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 0000
+        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CAI, C0,                       C0, C0, C0),      -- LDA 0001
+        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CBI, CEO or CAI or CFI,        C0, C0, C0),      -- ADD 0010
+        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CRO or CBI, CEO or CAI or CSU or CFI, C0, C0, C0),      -- SUB 0011
+        (CMI or CCO, CRO or CII or CCE, CIO or CMI, CAO or CRI, C0,                       C0, C0, C0),      -- STA 0100
+        (CMI or CCO, CRO or CII or CCE, CIO or CAI, C0,         C0,                       C0, C0, C0),      -- LDI 0101
+        (CMI or CCO, CRO or CII or CCE, CIO or CJ,  C0,         C0,                       C0, C0, C0),      -- JMP 0110
+        (CMI or CCO, CRO or CII or CCE, CIO,        C0,         C0,                       C0, C0, C0),      -- JC  0111
+        (CMI or CCO, CRO or CII or CCE, CIO,        C0,         C0,                       C0, C0, C0),      -- JZ  1000
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 1001
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 1010
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 1011
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 1100
+        (CMI or CCO, CRO or CII or CCE, C0,         C0,         C0,                       C0, C0, C0),      -- NOP 1101
+        (CMI or CCO, CRO or CII or CCE, CAO or COI, C0,         C0,                       C0, C0, C0),      -- OUT 1110
+        (CMI or CCO, CRO or CII or CCE, CHLT,       C0,         C0,                       C0, C0, C0)       -- HLT 1111
     );
 
     -- variable stages : microcode_stages;
     signal micro_flags: bit_vector(15 downto 0);
     signal stage: unsigned(2 downto 0) := "000";
 begin
-    
+        
     micro_flags <= microcode(to_integer(unsigned(instruction_bus)))(to_integer(unsigned(stage)));
 
     hlt  <= to_stdulogic (micro_flags(15));
@@ -144,8 +144,6 @@ begin
     
     fi_n <= not to_stdulogic (micro_flags(0));
 
-    clr <= reset_button;
-    
     process(clk, clr)
     begin
         if clr = '1' then

@@ -24,14 +24,13 @@ architecture control_logic_tb_arch of control_logic_tb is
         port ( 
             clk: in std_logic;
     
-            instruction_bus: in std_logic_vector(3 downto 0);
-            reset_button: in std_logic := '0';
+            instruction_bus: in unsigned(3 downto 0);
             carry_flag: in std_logic;
             zero_flag: in std_logic;
     
         
             -- clear
-            clr: out std_logic;
+            clr: in std_logic;
         
             -- halt the clock
             hlt: out std_logic;
@@ -83,8 +82,8 @@ architecture control_logic_tb_arch of control_logic_tb is
 
     for control_0: control_logic use entity work.control_logic;
     
-    signal instruction_bus: std_logic_vector(3 downto 0) := "0000";
-    signal reset_button: std_logic := '0';
+    signal instruction_bus: unsigned(3 downto 0) := "0000";
+
     signal carry_flag: std_logic := '0';
     signal zero_flag: std_logic := '0';
      
@@ -115,11 +114,11 @@ begin
     );
 
     run_clock <= '1';
+    clr <= '0';
 
     control_0: control_logic port map(
         clk => clk,    
         instruction_bus => instruction_bus,
-        reset_button => reset_button,
         carry_flag => carry_flag,
         zero_flag => zero_flag,
         clr => clr,

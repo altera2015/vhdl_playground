@@ -4,6 +4,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity instruction_register_tb is
 end instruction_register_tb;
@@ -34,10 +35,10 @@ architecture instruction_register_tb_arch of instruction_register_tb is
             cpu_bus: inout std_logic_vector(7 downto 0);
         
             -- Register Value
-            reg: out std_logic_vector(7 downto 0) := "00000000";
+            reg: out std_logic_vector(7 downto 0) ;
         
             -- Instruction Register Value
-            ireg: out std_logic_vector(7 downto 4)
+            ireg: out unsigned(3 downto 0)
         
         
         );
@@ -56,7 +57,7 @@ architecture instruction_register_tb_arch of instruction_register_tb is
     signal clr: std_logic := '0';
     signal cpu_bus: std_logic_vector(7 downto 0) := "ZZZZZZZZ";
     signal register_data: std_logic_vector(7 downto 0);
-    signal iregister_data: std_logic_vector(7 downto 4);
+    signal iregister_data: unsigned(3 downto 0);
 
 
 begin

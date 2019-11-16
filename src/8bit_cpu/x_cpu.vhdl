@@ -15,7 +15,7 @@ end entity;
 architecture cpu_arch of cpu is
     
 
-    signal clr: std_logic := '0';
+    signal clr: std_logic;
     signal cpu_bus: std_logic_vector(7 downto 0) := "ZZZZZZZZ";
     
 
@@ -105,7 +105,7 @@ architecture cpu_arch of cpu is
             cpu_bus: inout std_logic_vector(7 downto 0);
         
             -- Program counter
-            pc: out std_logic_vector(3 downto 0) := "0000"      
+            pc: out std_logic_vector(3 downto 0)      
         
         );
     end component;
@@ -132,7 +132,7 @@ architecture cpu_arch of cpu is
             -- CPU bus, by default high impedance
             cpu_bus: inout std_logic_vector(7 downto 0);        
             -- Register Value
-            reg: out std_logic_vector(7 downto 0) := "00000000"        
+            reg: out std_logic_vector(7 downto 0)        
         );
     end component;
 
@@ -158,7 +158,7 @@ architecture cpu_arch of cpu is
             cpu_bus: in std_logic_vector(7 downto 0);
         
             -- Register Value
-            address: out std_logic_vector(3 downto 0) := "0000"        
+            address: out std_logic_vector(3 downto 0)       
         
         );
     end component;
@@ -208,10 +208,10 @@ architecture cpu_arch of cpu is
             cpu_bus: inout std_logic_vector(7 downto 0);
         
             -- Register Value
-            reg: out std_logic_vector(7 downto 0) := "00000000";
+            reg: out std_logic_vector(7 downto 0) ;
         
             -- Instruction Register Value
-            ireg: out std_logic_vector(7 downto 4)
+            ireg: out unsigned(3 downto 0)
         
         
         );
@@ -222,7 +222,7 @@ architecture cpu_arch of cpu is
     signal io_n: std_logic := '1';
     signal ii_n: std_logic := '1';
     -- signal register_data: std_logic_vector(7 downto 0);
-    signal iregister: std_logic_vector(7 downto 4);
+    signal iregister: unsigned(3 downto 0);
 
 
     --=======================================================--
@@ -243,7 +243,7 @@ architecture cpu_arch of cpu is
             cpu_bus: inout std_logic_vector(7 downto 0);
         
             -- Register Value
-            reg: out std_logic_vector(7 downto 0) := "00000000"
+            reg: out std_logic_vector(7 downto 0) 
         
         );
     end component;
@@ -267,13 +267,12 @@ architecture cpu_arch of cpu is
         port ( 
             clk: in std_logic;
     
-            instruction_bus: in std_logic_vector(3 downto 0);
-            reset_button: in std_logic := '0';
+            instruction_bus: in unsigned(3 downto 0);
             carry_flag: in std_logic;
             zero_flag: in std_logic;
 
             -- clear
-            clr: out std_logic;
+            clr: in std_logic;
         
             -- halt the clock
             hlt: out std_logic;
@@ -320,7 +319,20 @@ architecture cpu_arch of cpu is
     for control_0: control_logic use entity work.control_logic;
     signal hlt: std_logic;   
     signal reset_button: std_logic := '0';
+        
+    signal por_clr: std_logic;
+    
 
+    --=======================================================--
+    -- Power On Reset
+    --=======================================================--  
+    component por
+        port (            
+            clk :     in std_logic;
+            reset_signal: out std_logic        
+        );
+    end component;
+    for por_0: por use entity work.por;
 begin
 
     clock_0: sim_clock port map( 
@@ -330,11 +342,17 @@ begin
     );
     
     run_clock <= not hlt;
+    
+
+    por_0: por port map (        
+        clk => clk,
+        reset_signal => por_clr
+    );
+    clr <= reset_button or por_clr;
 
     control_0: control_logic port map(
         clk => clk,    
         instruction_bus => iregister,
-        reset_button => reset_button,
         carry_flag => carry,
         zero_flag => zero,
         clr => clr,

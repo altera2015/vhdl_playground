@@ -27,7 +27,7 @@ entity program_counter is
     cpu_bus: inout std_logic_vector(7 downto 0);
 
     -- Program counter
-    pc: out std_logic_vector(3 downto 0) := "0000"
+    pc: out std_logic_vector(3 downto 0)
 
   );
 

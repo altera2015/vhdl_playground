@@ -22,7 +22,7 @@ entity mar_register is
     cpu_bus: in std_logic_vector(7 downto 0);
 
     -- Register Value
-    address: out std_logic_vector(3 downto 0) := "0000"
+    address: out std_logic_vector(3 downto 0)
 
   );
 

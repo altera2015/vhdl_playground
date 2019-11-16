@@ -7,6 +7,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity instruction_register is
 
@@ -24,10 +25,10 @@ entity instruction_register is
     cpu_bus: inout std_logic_vector(7 downto 0);
 
     -- Register Value
-    reg: out std_logic_vector(7 downto 0) := "00000000";
+    reg: out std_logic_vector(7 downto 0);
 
     -- Instruction Register Value
-    ireg: out std_logic_vector(7 downto 4)
+    ireg: out unsigned(3 downto 0) := "0000"
 
 
   );
@@ -37,18 +38,20 @@ end instruction_register;
 architecture instruction_register_arch of instruction_register is  
 begin
 
-  ireg <= reg(7 downto 4);
+  
   cpu_bus <= "ZZZZZZZZ" when io_n = '1' else "0000" & reg(3 downto 0);
   
   process(clk,clr)
   begin
     if clr = '1' then
-      reg <= "00000000";    
+      reg <= "00000000";
+      ireg <= "0000";
     -- asynchronous reset.
     elsif clr='0' and rising_edge(clk) then
 
         if ii_n = '0' and io_n = '1' then
           reg <= cpu_bus;
+          ireg <= unsigned( cpu_bus(7 downto 4));
         end if;
       
     end if;
