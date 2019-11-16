@@ -68,6 +68,11 @@ if errorlevel 1 GOTO ERR
 echo Control Logic OK
 echo.
 
+echo [46;30m CPU Test Bench [0m
+%GHDL% --elab-run --std=08 --workdir=work cpu --stop-time=500ns --vcd=cpu.vcd 
+if errorlevel 1 GOTO ERR
+echo CPU Done.
+echo.
 
 
 echo [42;97m Build Succeeded [0m

@@ -69,23 +69,23 @@ end control_logic;
 architecture control_logic_arch of control_logic is
 
     -- Output flags.
-    constant CHLT : bit_vector(15 downto 0) := "1000000000000000";
-    constant CMI  : bit_vector(15 downto 0) := "0100000000000000";
-    constant CRI  : bit_vector(15 downto 0) := "0010000000000000";
-    constant CRO  : bit_vector(15 downto 0) := "0001000000000000";
-    constant CIO  : bit_vector(15 downto 0) := "0000100000000000";
-    constant CII  : bit_vector(15 downto 0) := "0000010000000000";
-    constant CAI  : bit_vector(15 downto 0) := "0000001000000000";
-    constant CAO  : bit_vector(15 downto 0) := "0000000100000000";
-    constant CEO  : bit_vector(15 downto 0) := "0000000010000000";
-    constant CSU  : bit_vector(15 downto 0) := "0000000001000000";
-    constant CBI  : bit_vector(15 downto 0) := "0000000000100000";
-    constant COI  : bit_vector(15 downto 0) := "0000000000010000";
-    constant CCE  : bit_vector(15 downto 0) := "0000000000001000";
-    constant CCO  : bit_vector(15 downto 0) := "0000000000000100";
-    constant CJ   : bit_vector(15 downto 0) := "0000000000000010";
-    constant CFI  : bit_vector(15 downto 0) := "0000000000000001";
-    constant C0   : bit_vector(15 downto 0) := "0000000000000000";
+    constant CHLT : bit_vector(15 downto 0) := "1000000000000000"; -- halt bit
+    constant CMI  : bit_vector(15 downto 0) := "0100000000000000"; -- Memory Address Load from Bus (MAR)
+    constant CRI  : bit_vector(15 downto 0) := "0010000000000000"; -- Ram save bus to current address
+    constant CRO  : bit_vector(15 downto 0) := "0001000000000000"; -- Ram load bus with data at current address
+    constant CIO  : bit_vector(15 downto 0) := "0000100000000000"; -- Instruction Register place value on Bus
+    constant CII  : bit_vector(15 downto 0) := "0000010000000000"; -- Instruction Register load value from Bus
+    constant CAI  : bit_vector(15 downto 0) := "0000001000000000"; -- A Register load from bus
+    constant CAO  : bit_vector(15 downto 0) := "0000000100000000"; -- A Register place on bus
+    constant CEO  : bit_vector(15 downto 0) := "0000000010000000"; -- ALU place value on Bus
+    constant CSU  : bit_vector(15 downto 0) := "0000000001000000"; -- ALU sum or sub
+    constant CBI  : bit_vector(15 downto 0) := "0000000000100000"; -- B Register load from bus
+    constant COI  : bit_vector(15 downto 0) := "0000000000010000"; -- B Register place to bus
+    constant CCE  : bit_vector(15 downto 0) := "0000000000001000"; -- Tick Program Counter at next rising edge
+    constant CCO  : bit_vector(15 downto 0) := "0000000000000100"; -- Place Program Counter on Bus
+    constant CJ   : bit_vector(15 downto 0) := "0000000000000010"; -- Load value from bus into program counter
+    constant CFI  : bit_vector(15 downto 0) := "0000000000000001"; -- Load flags from ALU into Flag register
+    constant C0   : bit_vector(15 downto 0) := "0000000000000000"; -- NOP
 
     -- Instructions
     constant JC   : std_logic_vector(3 downto 0) := "0111";
