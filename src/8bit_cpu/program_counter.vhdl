@@ -34,23 +34,26 @@ entity program_counter is
 end program_counter;
 
 architecture program_counter_arch of program_counter is  
+  signal pc_internal: std_logic_vector(3 downto 0) := "0000";
 begin
 
-  cpu_bus <= "ZZZZZZZZ" when co_n = '1' else "0000" & pc;
+  pc <= pc_internal;  
+  cpu_bus <= "ZZZZZZZZ" when co_n = '1' else "0000" & pc_internal;
+  -- cpu_bus <= "ZZZZZZZZ" when co_n = '1' else "00000000";
 
   process(clk,clr)    
   begin
     if clr = '1' then
-      pc <= "0000";    
+      pc_internal <= "0000";    
     -- asynchronous reset.
     elsif clr='0' and rising_edge(clk) then
 
         if ce = '1' then          
-          pc <= std_logic_vector(unsigned(pc) + 1);
+          pc_internal <= std_logic_vector(unsigned(pc_internal) + 1);
         end if;
 
         if j_n = '0' then
-          pc <= cpu_bus(3 downto 0);
+          pc_internal <= cpu_bus(3 downto 0);
         end if;
       
     end if;

@@ -36,8 +36,8 @@ architecture main_arch of main is
 			value : in  STD_LOGIC_VECTOR (11 downto 0);
 			clk : in  STD_LOGIC;
 			en : in  STD_LOGIC;
-			
-			segments : out  STD_LOGIC_VECTOR (6 downto 0);
+		
+			segments : out  STD_LOGIC_VECTOR (6 downto 0) := ( others => '0' );
 			digits : out  STD_LOGIC_VECTOR (2 downto 0)	
 		);
 	end component;
@@ -52,8 +52,8 @@ architecture main_arch of main is
 	end component;	
 
 	
-	signal count: std_logic_vector(22 downto 0);
-	signal value: std_logic_vector(11 downto 0);	
+	signal count: std_logic_vector(22 downto 0):= ( others => '0' );
+	signal value: std_logic_vector(11 downto 0):= ( others => '0' );	
 begin	
 	
 	process(CLK_100MHz)

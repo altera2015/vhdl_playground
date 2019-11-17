@@ -36,21 +36,22 @@ entity instruction_register is
 end instruction_register;
 
 architecture instruction_register_arch of instruction_register is  
+    signal reg_internal: std_logic_vector(7 downto 0) := "00000000";
 begin
 
-  
-  cpu_bus <= "ZZZZZZZZ" when io_n = '1' else "0000" & reg(3 downto 0);
+  reg <= reg_internal;
+  cpu_bus <= "ZZZZZZZZ" when io_n = '1' else "0000" & reg_internal(3 downto 0);
   
   process(clk,clr)
   begin
     if clr = '1' then
-      reg <= "00000000";
+      reg_internal <= "00000000";
       ireg <= "0000";
     -- asynchronous reset.
     elsif clr='0' and rising_edge(clk) then
 
         if ii_n = '0' and io_n = '1' then
-          reg <= cpu_bus;
+          reg_internal <= cpu_bus;
           ireg <= unsigned( cpu_bus(7 downto 4));
         end if;
       

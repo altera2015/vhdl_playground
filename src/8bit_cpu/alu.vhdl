@@ -19,7 +19,7 @@ entity alu is
     fi_n: in std_logic;
 
     -- clear
-    clr: out std_logic;
+    clr: in std_logic;
 
     -- output result onto Bus
     eo_n: in std_logic;
@@ -45,18 +45,21 @@ end alu;
 architecture alu_arch of alu is
     signal temp : unsigned(8 downto 0);
     signal zero: std_logic;
-    signal carry: std_logic;  
+    signal carry: std_logic;
+    signal result_internal: std_logic_vector(7 downto 0) := "00000000";
 begin
 
+    result <= result_internal;
+    
     temp <= unsigned( "0" & a_reg ) + unsigned( "0" & b_reg ) when su = '0' else
             unsigned( "0" & a_reg ) - unsigned( "0" & b_reg ) when su = '1';
 
-    result <= std_logic_vector(temp(7 downto 0));
-    zero <= '1' when result = "00000000" else '0';
+    result_internal <= std_logic_vector(temp(7 downto 0));
+    zero <= '1' when result_internal = "00000000" else '0';
     carry <= temp(8);
 
     cpu_bus <= "ZZZZZZZZ" when eo_n = '1' else
-               result when eo_n = '0';
+               result_internal; -- when eo_n = '0';
 
     process(clk, clr)
     begin

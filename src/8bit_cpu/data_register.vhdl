@@ -31,19 +31,21 @@ entity data_register is
 end data_register;
 
 architecture data_register_arch of data_register is  
+    signal reg_internal: std_logic_vector(7 downto 0) := "00000000";
 begin
 
-  cpu_bus <= "ZZZZZZZZ" when ao_n = '1' else reg;
+  reg <= reg_internal;
+  cpu_bus <= "ZZZZZZZZ" when ao_n = '1' else reg_internal;
 
   process(clk,clr)
   begin
     if clr = '1' then
-      reg <= "00000000";    
+      reg_internal <= "00000000";    
     -- asynchronous reset.
     elsif clr='0' and rising_edge(clk) then
 
         if ai_n = '0' and ao_n = '1' then
-          reg <= cpu_bus;
+          reg_internal <= cpu_bus;
         end if;
       
     end if;

@@ -21,7 +21,7 @@ entity output_register is
     oi: in std_logic;
 
     -- CPU bus, by default high impedance
-    cpu_bus: inout std_logic_vector(7 downto 0);
+    cpu_bus: in std_logic_vector(7 downto 0);
 
     -- Register Value
     reg: out std_logic_vector(7 downto 0)
