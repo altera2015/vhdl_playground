@@ -41,7 +41,7 @@ ARCHITECTURE behavior OF cpu_tb IS
  
     COMPONENT cpu
     PORT(
-         CLK_100MHz : IN  std_logic;
+         clk : IN  std_logic;
          DPSwitch : IN  std_logic_vector(7 downto 0);
          Switch : IN  std_logic_vector(5 downto 0);
          LED : OUT  std_logic_vector(7 downto 0);
@@ -68,7 +68,7 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: cpu PORT MAP (
-          CLK_100MHz => CLK_100MHz,
+          clk => CLK_100MHz,
           DPSwitch => DPSwitch,
           Switch => Switch,
           LED => LED,

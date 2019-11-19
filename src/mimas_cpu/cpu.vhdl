@@ -12,7 +12,7 @@ use ieee.numeric_std.all;
 
 entity cpu is
     port ( 
-        CLK_100MHz : in  std_logic;
+        clk : in  std_logic;
         DPSwitch : in  std_logic_vector (7 downto 0);
         Switch : in  std_logic_vector (5 downto 0);
         LED : out  std_logic_vector (7 downto 0);
@@ -325,14 +325,14 @@ architecture cpu_arch of cpu is
     signal clr: std_logic;
 	signal seven_segment_enabled: std_logic := '1';
 	signal output_register_data: std_logic_vector(7 downto 0) := "00000000";
-    signal extended_output_register_data: std_logic_vector(11 downto 0);    
+    signal extended_output_register_data: std_logic_vector(11 downto 0);
 begin
 
     clr <= hlt or Switch(0);
     LED(0) <= not clr;
     
     control_0: control_logic port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         instruction_bus => iregister,
         carry_flag => carry,
         zero_flag => zero,
@@ -356,7 +356,7 @@ begin
     );    
     
     alu_0: alu port map( 
-        clk => CLK_100MHz,
+        clk => clk,
         clr => clr,
         fi_n => fi_n,
         eo_n=>eo_n, 
@@ -370,7 +370,7 @@ begin
     );    
 
     program_counter_0: program_counter port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         co_n => co_n,
         clr => clr,        
         cpu_bus => cpu_bus,
@@ -381,7 +381,7 @@ begin
 
 
     output_register_0: output_register port map(
-        clk => CLK_100MHz,            
+        clk => clk,            
         oi => oi,
         clr => clr,        
         cpu_bus => cpu_bus,
@@ -389,7 +389,7 @@ begin
     );
 
     mar_register_0: mar_register port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         mi_n => mi_n,
         clr => clr,        
         cpu_bus => cpu_bus,
@@ -397,7 +397,7 @@ begin
     );
 
     ram_0: local_ram port map( 
-        clk=>CLK_100MHz,
+        clk=>clk,
         ro_n=>ro_n,
         ri=>ri,
         cpu_bus=>cpu_bus,
@@ -405,7 +405,7 @@ begin
     );
 
     instruction_register_0: instruction_register port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         io_n => io_n,
         ii_n => ii_n,
         clr => clr,        
@@ -415,7 +415,7 @@ begin
     );
 
     register_a: data_register port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         ao_n => ao_n,
         ai_n => ai_n,
         clr => clr,        
@@ -424,7 +424,7 @@ begin
     );
 
     register_b: data_register port map(
-        clk => CLK_100MHz,    
+        clk => clk,    
         ao_n => bo_n,
         ai_n => bi_n,
         clr => clr,        
@@ -438,7 +438,7 @@ begin
         digits => SevenSegmentEnable,
         en => seven_segment_enabled,
         value => extended_output_register_data,
-        clk => CLK_100MHz
+        clk => clk
     );
 	SevenSegment(0) <= '1';
 
