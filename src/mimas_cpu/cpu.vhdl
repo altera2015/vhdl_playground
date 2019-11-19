@@ -13,11 +13,9 @@ use ieee.numeric_std.all;
 entity cpu is
     port ( 
         clk : in  std_logic;
-        DPSwitch : in  std_logic_vector (7 downto 0);
-        Switch : in  std_logic_vector (5 downto 0);
-        LED : out  std_logic_vector (7 downto 0);
-        SevenSegment : out  std_logic_vector (7 downto 0);
-        SevenSegmentEnable : out  std_logic_vector (2 downto 0)
+        reset: in std_logic;
+        out_reg: out std_logic_vector(7 downto 0);
+        LED : out  std_logic_vector (7 downto 0)
     );
 end cpu;
 
@@ -302,34 +300,13 @@ architecture cpu_arch of cpu is
     end component;    
     
     --for control_0: control_logic use entity work.control_logic;
-    
-    
-    --=======================================================--
-    -- Seven Segment Display
-    --=======================================================--     
-    component sevenseg
-        port(
-            value : in  STD_LOGIC_VECTOR (11 downto 0);
-            clk : in  STD_LOGIC;
-            en : in  STD_LOGIC;
-
-            segments : out  STD_LOGIC_VECTOR (6 downto 0);
-            digits : out  STD_LOGIC_VECTOR (2 downto 0)	
-        );
-    end component;    
-    
-    
-    
-    
     signal hlt: std_logic := '0';
     signal clr: std_logic;
-	signal seven_segment_enabled: std_logic := '1';
-	signal output_register_data: std_logic_vector(7 downto 0) := "00000000";
-    signal extended_output_register_data: std_logic_vector(11 downto 0);
+
 begin
 
-    clr <= hlt or Switch(0);
-    LED(0) <= not clr;
+    clr <= hlt or reset;
+    -- LED(0) <= not clr;
     
     control_0: control_logic port map(
         clk => clk,    
@@ -385,7 +362,7 @@ begin
         oi => oi,
         clr => clr,        
         cpu_bus => cpu_bus,
-        reg => output_register_data
+        reg => out_reg
     );
 
     mar_register_0: mar_register port map(
@@ -431,16 +408,8 @@ begin
         cpu_bus => cpu_bus,
         reg => register_data_B
     );
-
-    extended_output_register_data <= "0000" & output_register_data;
-    sevenseg_0: sevenseg port map(
-        segments => SevenSegment(7 downto 1),
-        digits => SevenSegmentEnable,
-        en => seven_segment_enabled,
-        value => extended_output_register_data,
-        clk => clk
-    );
-	SevenSegment(0) <= '1';
+    
+    LED <= register_data_A;
 
 end cpu_arch;
 

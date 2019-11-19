@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   09:02:43 11/17/2019
+-- Create Date:   05:34:09 11/19/2019
 -- Design Name:   
--- Module Name:   /home/ise/devel/vhdl_playground/src/mimas_cpu/cpu_tb.vhdl
+-- Module Name:   /home/ise/devel/t/vhdl_playground/src/mimas_cpu/cpu_tb.vhdl
 -- Project Name:  mimas_cpu
 -- Target Device:  
 -- Tool versions:  
@@ -42,47 +42,41 @@ ARCHITECTURE behavior OF cpu_tb IS
     COMPONENT cpu
     PORT(
          clk : IN  std_logic;
-         DPSwitch : IN  std_logic_vector(7 downto 0);
-         Switch : IN  std_logic_vector(5 downto 0);
-         LED : OUT  std_logic_vector(7 downto 0);
-         SevenSegment : OUT  std_logic_vector(7 downto 0);
-         SevenSegmentEnable : OUT  std_logic_vector(2 downto 0)
+         reset : IN  std_logic;
+         out_reg : OUT  std_logic_vector(7 downto 0);
+         LED : OUT  std_logic_vector(7 downto 0)
         );
     END COMPONENT;
     
 
    --Inputs
-   signal CLK_100MHz : std_logic := '0';
-   signal DPSwitch : std_logic_vector(7 downto 0) := (others => '0');
-   signal Switch : std_logic_vector(5 downto 0) := (others => '0');
+   signal clk : std_logic := '0';
+   signal reset : std_logic := '0';
 
  	--Outputs
+   signal out_reg : std_logic_vector(7 downto 0);
    signal LED : std_logic_vector(7 downto 0);
-   signal SevenSegment : std_logic_vector(7 downto 0);
-   signal SevenSegmentEnable : std_logic_vector(2 downto 0);
 
    -- Clock period definitions
-   constant CLK_100MHz_period : time := 10 ns;
+   constant clk_period : time := 10 ns;
  
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: cpu PORT MAP (
-          clk => CLK_100MHz,
-          DPSwitch => DPSwitch,
-          Switch => Switch,
-          LED => LED,
-          SevenSegment => SevenSegment,
-          SevenSegmentEnable => SevenSegmentEnable
+          clk => clk,
+          reset => reset,
+          out_reg => out_reg,
+          LED => LED
         );
 
    -- Clock process definitions
-   CLK_100MHz_process :process
+   clk_process :process
    begin
-		CLK_100MHz <= '0';
-		wait for CLK_100MHz_period/2;
-		CLK_100MHz <= '1';
-		wait for CLK_100MHz_period/2;
+		clk <= '0';
+		wait for clk_period/2;
+		clk <= '1';
+		wait for clk_period/2;
    end process;
  
 
@@ -92,7 +86,7 @@ BEGIN
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 
-      wait for CLK_100MHz_period*10;
+      wait for clk_period*10;
 
       -- insert stimulus here 
 

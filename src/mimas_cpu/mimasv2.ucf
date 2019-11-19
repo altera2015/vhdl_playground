@@ -14,9 +14,9 @@ CONFIG VCCAUX = "3.3" ;
    
 TIMESPEC TS_CLK_100MHz = PERIOD "CLK_100MHz" 10 ns HIGH 50%;
 
-# Mark the slow_clock as a clock net
-NET slow_clock TNM_NET = tnm_slowClk;
-TIMESPEC TS_slowClk = FROM tnm_slowClk TO tnm_slowClk TS_CLK_100MHz * 2;
+# Mark the clock_really_slow as a clock net
+NET clock_really_slow TNM_NET = tnm_slowClk;
+TIMESPEC TS_slowClk = FROM tnm_slowClk TO tnm_slowClk TS_slow_clock_0_clkout1 * 32767;
 
    #NET "CLK_12MHz"                   LOC = D9      | IOSTANDARD = LVCMOS33 | PERIOD = 12MHz ;
 ###################################################################################################################################################
