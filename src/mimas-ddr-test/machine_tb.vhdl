@@ -31,7 +31,9 @@ USE ieee.std_logic_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
- 
+library unisim;
+use unisim.vcomponents.all;
+
 ENTITY machine_tb IS
 END machine_tb;
  
@@ -150,7 +152,9 @@ ARCHITECTURE behavior OF machine_tb IS
    signal mcb3_dram_ck_n : std_logic;
    signal ram_cs: std_logic;
    signal mcb3_dram_dmsv : std_logic_vector(1 downto 0);
-   signal mcb3_dram_dqs_vector : std_logic_vector(1 downto 0);
+   signal mcb3_dram_dqsv : std_logic_vector(1 downto 0);
+   -- signal mcb3_dram_dqs_vector : std_logic_vector(1 downto 0);
+   
    signal c3_rst0 : std_logic;
    
    -- Clock period definitions
@@ -172,8 +176,8 @@ BEGIN
     process(mcb3_dram_ck)
     begin
       if (rising_edge(mcb3_dram_ck)) then
-        if (c3_rst0 = '0') then
-          mcb3_enable1   <= '0';
+        if (c3_rst0 = '1') then
+          mcb3_enable1 <= '0';
           mcb3_enable2 <= '0';
         elsif (mcb3_command = "100") then
           mcb3_enable2 <= '0';
@@ -186,26 +190,6 @@ BEGIN
       end if;
     end process;
 
------------------------------------------------------------------------------
---read
------------------------------------------------------------------------------
-    mcb3_dram_dqs_vector(1 downto 0)               <= (mcb3_dram_udqs & mcb3_dram_dqs)
-                                                           when (mcb3_enable2 = '0' and mcb3_enable1 = '0')
-							   else "ZZ";
-
------------------------------------------------------------------------------
---write
------------------------------------------------------------------------------
-    mcb3_dram_dqs          <= mcb3_dram_dqs_vector(0)
-                              when ( mcb3_enable1 = '1') else 'Z';
-
-    mcb3_dram_udqs          <= mcb3_dram_dqs_vector(1)
-                              when (mcb3_enable1 = '1') else 'Z';    
-    
-    mcb3_dram_dmsv <= mcb3_dram_udm & mcb3_dram_dm;
-    --mcb3_dram_dqsv <= mcb3_dram_udqs & mcb3_dram_dqs;
-    ram_cs <= '0';
-    
     lpddr_model_c3_0 : lpddr_model_c3 port map (
     
             Clk => mcb3_dram_ck,
@@ -218,11 +202,35 @@ BEGIN
             Addr => mcb3_dram_a,
             Ba => mcb3_dram_ba,
             Dq =>mcb3_dram_dq,
-            Dqs => mcb3_dram_dqs_vector,
+            Dqs => mcb3_dram_dqsv,
             Dm => mcb3_dram_dmsv
     );
- 
-    mcb3_rzq <= 'L';
+    
+
+-----------------------------------------------------------------------------
+--read
+-----------------------------------------------------------------------------
+    mcb3_dram_dqsv(1 downto 0) <= (mcb3_dram_udqs & mcb3_dram_dqs)
+                                                          when (mcb3_enable2 = '0' and mcb3_enable1 = '0')
+						   else "ZZ";
+
+-----------------------------------------------------------------------------
+--write
+-----------------------------------------------------------------------------
+    mcb3_dram_dqs          <= mcb3_dram_dqsv(0)
+                              when ( mcb3_enable1 = '1') else 'Z';
+
+    mcb3_dram_udqs          <= mcb3_dram_dqsv(1)
+                              when (mcb3_enable1 = '1') else 'Z';    
+    
+    mcb3_dram_dmsv <= mcb3_dram_udm & mcb3_dram_dm;
+    --mcb3_dram_dqsv <= mcb3_dram_udqs & mcb3_dram_dqs;
+    
+    ram_cs <= '0';
+    
+
+    rzq_pulldown3 : PULLDOWN port map(O => mcb3_rzq);
+    --mcb3_rzq <= 'L';
     
 	-- Instantiate the Unit Under Test (UUT)
    uut: machine PORT MAP (

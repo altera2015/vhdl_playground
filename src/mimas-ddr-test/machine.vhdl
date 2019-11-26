@@ -108,7 +108,7 @@ architecture Behavioral of machine is
         C3_CALIB_SOFT_IP          : string := "TRUE";
         C3_SIMULATION             : string := "TRUE";
         -- C3_MC_CALIB_BYPASS        : string := "FALSE";
-        DEBUG_EN                  : integer := 1;
+        DEBUG_EN                  : integer := 0;
         C3_MEM_ADDR_ORDER         : string := "ROW_BANK_COLUMN";
         C3_NUM_DQ_PINS            : integer := 16;
         C3_MEM_ADDR_WIDTH         : integer := 13;

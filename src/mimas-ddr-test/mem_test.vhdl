@@ -60,7 +60,7 @@ architecture Behavioral of mem_test is
     type mem_test_state is ( Idle, WaitForWrQueue, WritingWrQueue, WaitForCmdQueue, WritingCmdQueue, 
                             PrepareRead, CommandRead, WaitForReadData, Done );
     
-    signal fsm: unsigned(1 downto 0) := "00";
+    --signal fsm: unsigned(1 downto 0) := "00";
     signal state_reg: mem_test_state := Idle;
     
 begin
@@ -72,13 +72,15 @@ begin
         if reset = '1' then
             mem_test_in_progress <= '0';
             address <= (others=>'0');
-            fsm <= "00";
+            --fsm <= "00";
             wr_en <= '0';
             cmd_en <= '0';
             state_reg <= Idle;
         elsif rising_edge(clk) then
             cmd_en <= '0';
             wr_en <= '0';
+            rd_en <= '0';
+            
                         
             case (state_reg) is
                 when Idle =>
@@ -100,7 +102,7 @@ begin
                         wr_en <= '0';
                         cmd_instr <= "000";
                         cmd_byte_addr <= std_logic_vector(address);
-                        cmd_bl <= "000001";
+                        cmd_bl <= "000000";
                         
                         state_reg <= WaitForCmdQueue;
                     end if;
@@ -115,18 +117,18 @@ begin
                     -- if to_integer(address) = 16777216 then
                     if to_integer(address) = 16 then
                         state_reg <= PrepareRead;
-                        address <= (others => '0');                        
+                        address <= to_unsigned(4, address'length); --(others => '0');                        
                     else
                         state_reg <= WaitForWrQueue;
                     end if;
                 
                 when PrepareRead =>
                 
-                    if cmd_full = '0' then
-                        rd_en <= '0';
+                    if cmd_full = '0' and wr_empty='1' then
+                        --rd_en <= '0';
                         cmd_instr <= "001";
                         cmd_byte_addr <= std_logic_vector(address);
-                        cmd_bl <= "000001";                        
+                        cmd_bl <= "000000"; -- read 1 word
                         state_reg <= CommandRead;
                     end if;                    
                    
@@ -138,15 +140,17 @@ begin
                 when WaitForReadData =>
                     
                     cmd_en <= '0';
-                    rd_en <= '1';
-                    if rd_empty = '0' then
                     
+                    -- if rd_empty /= '0' then
+                    
+                    if rd_count /= "0000000" then
+                        rd_en <= '1';    
                         if rd_data /= "11111010111110101111101011111010" then
                             mem_fail <= '1';
                             state_reg <= Done;
                         else
                             address <= address + 4;
-                            if to_integer(address) = 16777216 then 
+                            if to_integer(address) = 4 then 
                                 state_reg <= Done;
                                 mem_ok <= '1';
                             else

@@ -30,7 +30,7 @@
 
     // Timing parameters based on Speed Grade
 `define x512Mb
-`define sg25E
+`define sg5
 `define x16
 
 `ifdef x128Mb                                
