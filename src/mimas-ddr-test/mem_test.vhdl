@@ -1,14 +1,8 @@
+-- Test memory writing and reading 1 word (32bits) at a time.
+
 library ieee;
 use ieee.std_logic_1164.all;
-
--- uncomment the following library declaration if using
--- arithmetic functions with signed or unsigned values
 use ieee.numeric_std.all;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 
 -- https://www.xilinx.com/support/documentation/user_guides/ug388.pdf
@@ -26,14 +20,14 @@ entity mem_test is
         mem_ok: out std_logic;
         mem_fail: out std_logic;
             
-        --cmd_clk                           : out std_logic;
+        
         cmd_en                            : out std_logic;
         cmd_instr                         : out std_logic_vector(2 downto 0);
         cmd_bl                            : out std_logic_vector(5 downto 0);
         cmd_byte_addr                     : out  std_logic_vector(29 downto 0);
         cmd_empty                         : in std_logic;
         cmd_full                          : in std_logic;
-        --wr_clk                            : out std_logic;
+        
         wr_en                             : out std_logic;
         wr_mask                           : out std_logic_vector(MASK_SIZE - 1 downto 0);
         wr_data                           : out std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
@@ -42,7 +36,7 @@ entity mem_test is
         wr_count                          : in std_logic_vector(6 downto 0);
         wr_underrun                       : in std_logic;
         wr_error                          : in std_logic;
-        --rd_clk                            : out std_logic;
+        
         rd_en                             : out std_logic;
         rd_data                           : in std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
         rd_full                           : in std_logic;
@@ -59,8 +53,7 @@ architecture Behavioral of mem_test is
     
     type mem_test_state is ( Idle, WaitForWrQueue, WritingWrQueue, WaitForCmdQueue, WritingCmdQueue, 
                             PrepareRead, CommandRead, WaitForReadData, Done );
-    
-    --signal fsm: unsigned(1 downto 0) := "00";
+        
     signal state_reg: mem_test_state := Idle;
     
 begin
@@ -71,53 +64,60 @@ begin
     begin
         if reset = '1' then
             mem_test_in_progress <= '0';
-            address <= (others=>'0');
-            --fsm <= "00";
+            mem_fail <= '0';
+            mem_ok <= '0';
+            address <= (others=>'0');            
             wr_en <= '0';
             cmd_en <= '0';
             state_reg <= Idle;
+            
         elsif rising_edge(clk) then
+        
             cmd_en <= '0';
             wr_en <= '0';
-            rd_en <= '0';
-            
+            rd_en <= '0';            
                         
             case (state_reg) is
+            
                 when Idle =>
+                
+                    mem_fail <= '0';
+                    mem_ok <= '0';
+                    mem_test_in_progress <= '0';
                     if run = '1' then
                         state_reg <= WritingWrQueue;
                     end if;                
+                    
                 when WaitForWrQueue =>
+                
                     mem_test_in_progress <= '1';
                     if wr_full = '0' and cmd_full='0' then
                         wr_data <= "11111010111110101111101011111010";
                         wr_en <= '1';
-                        state_reg <= WritingWrQueue;
-                        cmd_en <= '0';
+                        state_reg <= WritingWrQueue;                        
                     end if;
                     
                 when WritingWrQueue =>
                 
-                    if cmd_full = '0' then
-                        wr_en <= '0';
+                    if cmd_full = '0' then                        
                         cmd_instr <= "000";
                         cmd_byte_addr <= std_logic_vector(address);
-                        cmd_bl <= "000000";
-                        
+                        cmd_bl <= "000000"; --write 1 word                        
                         state_reg <= WaitForCmdQueue;
                     end if;
                     
                 when WaitForCmdQueue =>
+                
                     cmd_en <= '1';
                     state_reg <= WritingCmdQueue;
                     
                 when WritingCmdQueue =>
-                    cmd_en <= '0';
+                    
                     address <= address + 4;
                     -- if to_integer(address) = 16777216 then
-                    if to_integer(address) = 16 then
+                    if to_integer(address) = 1024 then
                         state_reg <= PrepareRead;
-                        address <= to_unsigned(4, address'length); --(others => '0');                        
+                        address <= to_unsigned(0, address'length); --(others => '0');                        
                     else
                         state_reg <= WaitForWrQueue;
                     end if;
@@ -125,7 +125,6 @@ begin
                 when PrepareRead =>
                 
                     if cmd_full = '0' and wr_empty='1' then
-                        --rd_en <= '0';
                         cmd_instr <= "001";
                         cmd_byte_addr <= std_logic_vector(address);
                         cmd_bl <= "000000"; -- read 1 word
@@ -139,10 +138,6 @@ begin
                 
                 when WaitForReadData =>
                     
-                    cmd_en <= '0';
-                    
-                    -- if rd_empty /= '0' then
-                    
                     if rd_count /= "0000000" then
                         rd_en <= '1';    
                         if rd_data /= "11111010111110101111101011111010" then
@@ -150,7 +145,7 @@ begin
                             state_reg <= Done;
                         else
                             address <= address + 4;
-                            if to_integer(address) = 4 then 
+                            if to_integer(address) = 1024 then 
                                 state_reg <= Done;
                                 mem_ok <= '1';
                             else
@@ -163,9 +158,6 @@ begin
                     
                 when Done =>
                     mem_test_in_progress <= '0';
-                    rd_en <= '0';
-                    cmd_en <= '0';
-                    wr_en <= '0';
                 when others =>
                     wr_en <= '0';
             end case;

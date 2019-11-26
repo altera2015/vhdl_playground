@@ -60,7 +60,6 @@ ARCHITECTURE behavior OF machine_tb IS
         C3_SIMULATION           : string := "TRUE"; 
                                            -- # = TRUE, Simulating the design. Useful to reduce the simulation time,
                                            -- # = FALSE, Implementing the design.
-        C3_MC_CALIB_BYPASS      : string := "TRUE";
         C3_HW_TESTING           : string := "FALSE"; 
                                            -- Determines the address space accessed by the traffic generator,
                                            -- # = FALSE, Smaller address space,

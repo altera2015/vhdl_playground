@@ -84,7 +84,6 @@
 // DO NOT CHANGE THE TIMESCALE
 // MAKE SURE YOUR SIMULATOR USES "PS" RESOLUTION
 `timescale 1ns / 1ps
-`define FULL_MEM
 
 module lpddr_model_c3(Dq, Dqs, Addr, Ba, Clk, Clk_n, Cke, Cs_n, Ras_n, Cas_n, We_n, Dm);
 
@@ -393,7 +392,7 @@ module lpddr_model_c3(Dq, Dqs, Addr, Ba, Clk, Clk_n, Cke, Cs_n, Ras_n, Cas_n, We
     assign    Dq  = (Dq_out_en ) ? Dq_out              : 'bz;
 
     // Debug message
-    wire      Debug = 0'b1;
+    wire      Debug = 1'b1;
 
     // Timing Check
 //    realtime      MRD_chk;

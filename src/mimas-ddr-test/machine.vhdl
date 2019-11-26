@@ -1,33 +1,6 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    10:49:59 11/19/2019 
--- Design Name: 
--- Module Name:    machine - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- revision 0.01 - file created
--- additional comments: 
---
-----------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
-
--- uncomment the following library declaration if using
--- arithmetic functions with signed or unsigned values
 use ieee.numeric_std.all;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity machine is
 generic
@@ -49,7 +22,6 @@ generic
         C3_SIMULATION           : string := "FALSE"; 
                                            -- # = TRUE, Simulating the design. Useful to reduce the simulation time,
                                            -- # = FALSE, Implementing the design.
-        C3_MC_CALIB_BYPASS      : string := "FALSE";
         C3_HW_TESTING           : string := "FALSE"; 
                                            -- Determines the address space accessed by the traffic generator,
                                            -- # = FALSE, Smaller address space,
@@ -107,7 +79,6 @@ architecture Behavioral of machine is
         C3_INPUT_CLK_TYPE         : string := "SINGLE_ENDED";
         C3_CALIB_SOFT_IP          : string := "TRUE";
         C3_SIMULATION             : string := "TRUE";
-        -- C3_MC_CALIB_BYPASS        : string := "FALSE";
         DEBUG_EN                  : integer := 0;
         C3_MEM_ADDR_ORDER         : string := "ROW_BANK_COLUMN";
         C3_NUM_DQ_PINS            : integer := 16;
@@ -195,17 +166,18 @@ architecture Behavioral of machine is
         clk : in std_logic;
         reset : in std_logic;
         run: in std_logic;
+        
         mem_test_in_progress: out std_logic;
         mem_ok: out std_logic;
         mem_fail: out std_logic;
-        --cmd_clk                           : out std_logic;
+
         cmd_en                            : out std_logic;
         cmd_instr                         : out std_logic_vector(2 downto 0);
         cmd_bl                            : out std_logic_vector(5 downto 0);
         cmd_byte_addr                     : out  std_logic_vector(29 downto 0);
         cmd_empty                         : in std_logic;
         cmd_full                          : in std_logic;
-        --wr_clk                            : out std_logic;
+
         wr_en                             : out std_logic;
         wr_mask                           : out std_logic_vector(MASK_SIZE - 1 downto 0);
         wr_data                           : out std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
@@ -214,7 +186,7 @@ architecture Behavioral of machine is
         wr_count                          : in std_logic_vector(6 downto 0);
         wr_underrun                       : in std_logic;
         wr_error                          : in std_logic;
-        --rd_clk                            : out std_logic;
+
         rd_en                             : out std_logic;
         rd_data                           : in std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
         rd_full                           : in std_logic;
@@ -224,13 +196,11 @@ architecture Behavioral of machine is
         rd_error                          : in std_logic 
      );
     end component;
-    signal bla: std_logic;
+    
     signal should_reset: std_logic;
     signal c3_calib_done : std_logic;
     signal  c3_clk0                                  : std_logic;
-    --signal  c3_rst                                   : std_logic;
-    
-    
+
     signal  c3_p0_cmd_en                             : std_logic;
     signal  c3_p0_cmd_instr                          : std_logic_vector(2 downto 0);
     signal  c3_p0_cmd_bl                             : std_logic_vector(5 downto 0);
@@ -289,7 +259,6 @@ begin
         C3_INPUT_CLK_TYPE => C3_INPUT_CLK_TYPE,
         C3_CALIB_SOFT_IP => C3_CALIB_SOFT_IP,
         C3_SIMULATION => C3_SIMULATION,
-        -- C3_MC_CALIB_BYPASS => C3_MC_CALIB_BYPASS,
         DEBUG_EN => DEBUG_EN,
         C3_MEM_ADDR_ORDER => C3_MEM_ADDR_ORDER,
         C3_NUM_DQ_PINS => C3_NUM_DQ_PINS,
@@ -374,30 +343,25 @@ begin
     c3_p1_wr_en <= '0';
     c3_p1_rd_en <= '0';
     c3_p1_cmd_en <= '0';
-    
-    
-    
-    
-    should_reset <= not c3_calib_done; -- when c3_rst = '0' else '1'; -- or not c3_calib_done;
-    bla <= c3_calib_done;
-    
+
+    should_reset <= not c3_calib_done; 
+
     mem_test_0: mem_test port map (
             clk  => c3_clk0,
             reset => should_reset,
-            run => bla,
+            run => c3_calib_done,
             
             mem_test_in_progress => LED(1),
             mem_ok => LED(2),
             mem_fail => LED(3),
-                                
-            --cmd_clk                           =>  c3_p0_cmd_clk,
+
             cmd_en                            =>  c3_p0_cmd_en,
             cmd_instr                         =>  c3_p0_cmd_instr,
             cmd_bl                            =>  c3_p0_cmd_bl,
             cmd_byte_addr                     =>  c3_p0_cmd_byte_addr,
             cmd_empty                         =>  c3_p0_cmd_empty,
             cmd_full                          =>  c3_p0_cmd_full,
-            --wr_clk                            =>  c3_p0_wr_clk,
+
             wr_en                             =>  c3_p0_wr_en,
             wr_mask                           =>  c3_p0_wr_mask,
             wr_data                           =>  c3_p0_wr_data,
@@ -406,7 +370,7 @@ begin
             wr_count                          =>  c3_p0_wr_count,
             wr_underrun                       =>  c3_p0_wr_underrun,
             wr_error                          =>  c3_p0_wr_error,
-            --rd_clk                            =>  c3_p0_rd_clk,
+
             rd_en                             =>  c3_p0_rd_en,
             rd_data                           =>  c3_p0_rd_data,
             rd_full                           =>  c3_p0_rd_full,

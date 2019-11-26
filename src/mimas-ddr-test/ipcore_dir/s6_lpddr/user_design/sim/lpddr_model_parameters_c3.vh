@@ -29,6 +29,7 @@
 // 12.10.08 - Updated T36N to Rev B 11/08
 
     // Timing parameters based on Speed Grade
+
 `define x512Mb
 `define sg5
 `define x16
