@@ -55,11 +55,7 @@ begin
 
     red <= "111" when blank='0' and y < 400 else "000";
     green <= "111" when blank='0' and y>=200 and y < 400 else "000";
-    blue <= "11" when blank='0' and y >= 200 else "00";
-
-    -- red <= "000" when blank='1' else "111";
-    -- green <= "000" when blank='1' else "000";
-    -- blue <= "00" when blank='1' else "00";    
+    blue <= "11" when blank='0' and y >= 200 else "00";  
 
 end machine_arch;
 
