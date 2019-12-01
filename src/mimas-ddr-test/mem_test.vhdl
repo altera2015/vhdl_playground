@@ -9,7 +9,8 @@ use ieee.numeric_std.all;
 entity mem_test is
     generic(
         MASK_SIZE           : integer := 4;
-        DATA_PORT_SIZE      : integer := 32
+        DATA_PORT_SIZE      : integer := 32;
+        MAX_MEMORY          : integer := 67108864
     );
     port (
         clk : in std_logic;
@@ -115,7 +116,7 @@ begin
                     
                     address <= address + 4;
                     -- if to_integer(address) = 16777216 then
-                    if to_integer(address) = 1024 then
+                    if to_integer(address) = MAX_MEMORY then
                         state_reg <= PrepareRead;
                         address <= to_unsigned(0, address'length); --(others => '0');                        
                     else
@@ -145,7 +146,7 @@ begin
                             state_reg <= Done;
                         else
                             address <= address + 4;
-                            if to_integer(address) = 1024 then 
+                            if to_integer(address) = MAX_MEMORY then 
                                 state_reg <= Done;
                                 mem_ok <= '1';
                             else

@@ -246,7 +246,15 @@ architecture Behavioral of machine is
     signal  c3_p1_rd_error                           : std_logic;
 begin
 
+    SevenSegmentEnable <= "111";
+    SevenSegment <= "11111111";
     LED(0) <= c3_calib_done;
+    
+    LED(4) <= '0';
+    LED(5) <= '0';
+    LED(6) <= '0';
+    LED(7) <= '0';
+    
     
     u_s6_lpddr : s6_lpddr
         generic map (
