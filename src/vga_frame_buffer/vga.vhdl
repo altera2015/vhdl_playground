@@ -58,17 +58,22 @@ architecture vga_arch of vga is
     
     signal x_c : integer range 0 to 1024 := 0;
     signal y_c : integer range 0 to 1024 := 0;
+    signal div : integer range 0 to 1 := 0;
 begin
     
     process(clk)
     begin
         if rising_edge(clk) then
-            x_c <= x_c + 1;
-            if x_c = H_WHOLE_FRAME then
-                x_c <= 0;            
-                y_c <= y_c + 1;
-                if y_c = V_WHOLE_FRAME then
-                    y_c <= 0;
+            div <= div + 1;
+            if div = 1 then
+                div <= 0;
+                x_c <= x_c + 1;
+                if x_c = H_WHOLE_FRAME then
+                    x_c <= 0;            
+                    y_c <= y_c + 1;
+                    if y_c = V_WHOLE_FRAME then
+                        y_c <= 0;
+                    end if;
                 end if;
             end if;
         end if;   

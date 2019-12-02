@@ -72,7 +72,7 @@ generic
           C3_P0_DATA_PORT_SIZE      : integer := 32;
           C3_P1_MASK_SIZE           : integer := 4;
           C3_P1_DATA_PORT_SIZE      : integer := 32;
-    C3_MEMCLK_PERIOD        : integer := 6000; 
+    C3_MEMCLK_PERIOD        : integer := 6000;  -- 10000
                                        -- Memory data transfer clock period.
     C3_RST_ACT_LOW          : integer := 0; 
                                        -- # = 1 for active low reset,
@@ -368,12 +368,21 @@ component memc3_wrapper is
 
 
 
-   constant C3_CLKOUT0_DIVIDE       : integer := 2; 
-   constant C3_CLKOUT1_DIVIDE       : integer := 2; 
-   constant C3_CLKOUT2_DIVIDE       : integer := 16; 
-   constant C3_CLKOUT3_DIVIDE       : integer := 8; 
-   constant C3_CLKFBOUT_MULT        : integer := 4; 
-   constant C3_DIVCLK_DIVIDE        : integer := 1; 
+   --constant C3_CLKOUT0_DIVIDE       : integer := 2; -- 200 O1
+   --constant C3_CLKOUT1_DIVIDE       : integer := 2; -- 200 O2
+   --constant C3_CLKOUT2_DIVIDE       : integer := 16; -- 50 USER
+   --constant C3_CLKOUT3_DIVIDE       : integer := 8;  -- 100 CALIB
+   --constant C3_CLKFBOUT_MULT        : integer := 4; --400
+   --constant C3_DIVCLK_DIVIDE        : integer := 1; --100
+   
+   constant C3_CLKOUT0_DIVIDE       : integer := 3; -- 333 O1
+   constant C3_CLKOUT1_DIVIDE       : integer := 3; -- 333 O2
+   constant C3_CLKOUT2_DIVIDE       : integer := 10; -- 100 USER
+   constant C3_CLKOUT3_DIVIDE       : integer := 10;  -- 100 CALIB
+   constant C3_CLKFBOUT_MULT        : integer := 10; --1000
+   constant C3_DIVCLK_DIVIDE        : integer := 1; --100
+   
+   
    constant C3_INCLK_PERIOD         : integer := ((C3_MEMCLK_PERIOD * C3_CLKFBOUT_MULT) / (C3_DIVCLK_DIVIDE * C3_CLKOUT0_DIVIDE * 2)); 
    constant C3_ARB_NUM_TIME_SLOTS   : integer := 12; 
    constant C3_ARB_TIME_SLOT_0      : bit_vector(5 downto 0) := o"01"; 

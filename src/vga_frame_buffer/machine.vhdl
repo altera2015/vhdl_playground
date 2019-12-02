@@ -1,6 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+library unisim;
+use unisim.vcomponents.all;
 
 entity machine is
 
@@ -9,7 +11,7 @@ entity machine is
         C3_P0_DATA_PORT_SIZE      : integer := 32;
         C3_P1_MASK_SIZE           : integer := 4;
         C3_P1_DATA_PORT_SIZE      : integer := 32;
-        C3_MEMCLK_PERIOD        : integer := 10000; 
+        C3_MEMCLK_PERIOD        : integer := 6000; 
                                            -- Memory data transfer clock period.
         C3_RST_ACT_LOW          : integer := 0; 
                                            -- # = 1 for active low reset,
@@ -52,7 +54,7 @@ entity machine is
         red : out  std_logic_vector (2 downto 0);
         green : out  std_logic_vector (2 downto 0);
         blue : out  std_logic_vector (2 downto 1);
-           
+        
         -- LPDDR pins
         mcb3_dram_dq                            : inout  std_logic_vector(C3_NUM_DQ_PINS-1 downto 0);
         mcb3_dram_a                             : out std_logic_vector(C3_MEM_ADDR_WIDTH-1 downto 0);
@@ -68,25 +70,28 @@ entity machine is
         mcb3_dram_dqs                           : inout  std_logic;
         mcb3_dram_ck                            : out std_logic;
         mcb3_dram_ck_n                          : out std_logic;        
-        c3_rst0                                 : out std_logic
+        c3_rst0                                 : out std_logic        
+        
+           
+
                
     );
 end machine;
 
 architecture machine_arch of machine is
 
-    component clock_core
-        port
-         (-- Clock in ports
-          CLK_IN1           : in     std_logic; -- external oscillator
-          -- Clock out ports
-          CLK_100           : out    std_logic; -- CPU clock
-          CLK_166           : out    std_logic; -- LPDDR clock
-          CLK_50            : out    std_logic; -- VGA clock
-          -- Status and control signals
-          RESET             : in     std_logic;
-          LOCKED            : out    std_logic        
-         );
+    component core_clock
+        port (
+            -- Clock in ports
+            CLK_IN1           : in     std_logic;
+            -- Clock out ports
+            CLK_100          : out    std_logic;
+            CLK_50          : out    std_logic;
+            CLK_166          : out    std_logic;
+            -- Status and control signals
+            RESET             : in     std_logic;
+            LOCKED            : out    std_logic
+        );
     end component;
 
     component vga
@@ -115,6 +120,12 @@ architecture machine_arch of machine is
     end component;
     
     
+    --
+    -- Warning, when recreating the lpddr3 core a critical modification
+    -- to the RTL files will be lost.
+    -- 
+    -- The IBUF needs to be removed from user_design/rtl/memc3_infrastructure.vhd
+    --
     component lpddr3
         generic(
             C3_P0_MASK_SIZE           : integer := 4;
@@ -262,31 +273,22 @@ architecture machine_arch of machine is
     signal CLK_100 : std_logic;
     signal CLK_166 : std_logic;
     signal RESET : std_logic;
-    signal LOCKED : std_logic;    
+    signal LOCKED : std_logic; 
+
 begin
         
+
     RESET <= not reset_button;
-    
-    clock_source : clock_core port map (
-        -- Clock in ports
-        CLK_IN1 => clk_100mhz,
-        -- Clock out ports
-        CLK_100 => CLK_100,
-        CLK_166 => CLK_166,
-        CLK_50 => CLK_50,
-        -- Status and control signals
-        RESET  => RESET,
-        LOCKED => LOCKED        
-    );
                
     vga_0: vga port map (
-       clk => CLK_50,
+       clk => c3_clk0,
        h_sync_n => hsync,
        v_sync_n => vsync,
        x => x,
        y => y,
        blank => blank
     );
+    
     
     u_lpddr3 : lpddr3 generic map (
         C3_P0_MASK_SIZE => C3_P0_MASK_SIZE,
@@ -306,8 +308,8 @@ begin
     ) port map (
     
         -- clock and reset inputs
-        c3_sys_clk         =>    CLK_166,
-        c3_sys_rst_i       =>    reset_button,                        
+        c3_sys_clk         =>    clk_100mhz,
+        c3_sys_rst_i       =>    RESET,                        
 
         -- Pinouts
         mcb3_dram_dq       =>    mcb3_dram_dq,  
@@ -382,6 +384,8 @@ begin
         c3_p1_rd_overflow                       =>  c3_p1_rd_overflow,
         c3_p1_rd_error                          =>  c3_p1_rd_error
     );    
+    
+    
 
     -- disable 7 segment displays
     SevenSegmentEnable <= "111";

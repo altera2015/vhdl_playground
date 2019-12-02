@@ -66,6 +66,7 @@ generic
     );
 end machine;
 
+
 architecture Behavioral of machine is
 
     component s6_lpddr
