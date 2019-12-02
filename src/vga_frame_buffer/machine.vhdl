@@ -44,7 +44,9 @@ entity machine is
 
     port ( 
         clk_100mhz : in std_logic;
+        
         reset_button : in std_logic; -- button is high when not pressed.
+        restart_button : in std_logic;
         LED : out std_logic_vector(7 downto 0);
         SevenSegment : out  std_logic_vector (7 downto 0);
         SevenSegmentEnable : out  std_logic_vector (2 downto 0);        
@@ -70,56 +72,37 @@ entity machine is
         mcb3_dram_dqs                           : inout  std_logic;
         mcb3_dram_ck                            : out std_logic;
         mcb3_dram_ck_n                          : out std_logic;        
-        c3_rst0                                 : out std_logic        
-        
-           
-
-               
+        c3_rst0                                 : out std_logic                 
     );
 end machine;
 
 architecture machine_arch of machine is
 
-    component core_clock
-        port (
-            -- Clock in ports
-            CLK_IN1           : in     std_logic;
-            -- Clock out ports
-            CLK_100          : out    std_logic;
-            CLK_50          : out    std_logic;
-            CLK_166          : out    std_logic;
-            -- Status and control signals
-            RESET             : in     std_logic;
-            LOCKED            : out    std_logic
-        );
-    end component;
+	COMPONENT vga_framebuffer
+	PORT(
+		clk : IN std_logic;
+        reset : in std_logic;
+		cmd_empty : IN std_logic;
+		cmd_full : IN std_logic;
+		rd_data : IN std_logic_vector(31 downto 0);
+		rd_full : IN std_logic;
+		rd_empty : IN std_logic;
+		rd_count : IN std_logic_vector(6 downto 0);
+		rd_overflow : IN std_logic;
+		rd_error : IN std_logic;          
+		hsync : OUT std_logic;
+		vsync : OUT std_logic;
+		red : OUT std_logic_vector(2 downto 0);
+		green : OUT std_logic_vector(2 downto 0);
+		blue : OUT std_logic_vector(2 downto 1);
+		cmd_en : OUT std_logic;
+		cmd_instr : OUT std_logic_vector(2 downto 0);
+		cmd_bl : OUT std_logic_vector(5 downto 0);
+		cmd_byte_addr : OUT std_logic_vector(29 downto 0);
+		rd_en : OUT std_logic
+		);
+	END COMPONENT;
 
-    component vga
-        generic (
-            
-            H_VISIBLE       : integer := 800;
-            H_FRONT_PORCH   : integer := 56;
-            H_SYNC_PULSE    : integer := 120;
-            H_BACK_PORCH    : integer := 64;
-        
-            V_VISIBLE       : integer := 600;
-            V_FRONT_PORCH   : integer := 37;
-            V_SYNC_PULSE    : integer := 6;
-            V_BACK_PORCH    : integer := 23
-            
-        );
-        port (
-            clk      : in std_logic; -- expecting 100MHz.
-            h_sync_n : out std_logic;
-            v_sync_n : out std_logic;
-            x        : out unsigned(9 downto 0);
-            y        : out unsigned(9 downto 0);
-            blank    : out std_logic  
-        );
-    
-    end component;
-    
-    
     --
     -- Warning, when recreating the lpddr3 core a critical modification
     -- to the RTL files will be lost.
@@ -215,6 +198,47 @@ architecture machine_arch of machine is
     end component;    
     
     
+    component mem_test
+     generic(
+        MASK_SIZE           : integer := 4;
+        DATA_PORT_SIZE      : integer := 32
+     );
+     port (
+        clk : in std_logic;
+        reset : in std_logic;
+        run: in std_logic;
+        
+        mem_test_in_progress: out std_logic;
+        mem_ok: out std_logic;
+        mem_fail: out std_logic;
+
+        cmd_en                            : out std_logic;
+        cmd_instr                         : out std_logic_vector(2 downto 0);
+        cmd_bl                            : out std_logic_vector(5 downto 0);
+        cmd_byte_addr                     : out  std_logic_vector(29 downto 0);
+        cmd_empty                         : in std_logic;
+        cmd_full                          : in std_logic;
+
+        wr_en                             : out std_logic;
+        wr_mask                           : out std_logic_vector(MASK_SIZE - 1 downto 0);
+        wr_data                           : out std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
+        wr_full                           : in std_logic;
+        wr_empty                          : in std_logic;
+        wr_count                          : in std_logic_vector(6 downto 0);
+        wr_underrun                       : in std_logic;
+        wr_error                          : in std_logic;
+
+        rd_en                             : out std_logic;
+        rd_data                           : in std_logic_vector(DATA_PORT_SIZE - 1 downto 0);
+        rd_full                           : in std_logic;
+        rd_empty                          : in std_logic;
+        rd_count                          : in std_logic_vector(6 downto 0);
+        rd_overflow                       : in std_logic;
+        rd_error                          : in std_logic 
+     );
+    end component;    
+    
+    
     -- Memory Connectivity.    
     signal  c3_calib_done                            : std_logic;
     signal  c3_clk0                                  : std_logic;
@@ -269,26 +293,19 @@ architecture machine_arch of machine is
     signal x: unsigned(9 downto 0);
     signal y: unsigned(9 downto 0);
     signal blank: std_logic;
-    signal CLK_50 : std_logic;
-    signal CLK_100 : std_logic;
-    signal CLK_166 : std_logic;
     signal RESET : std_logic;
-    signal LOCKED : std_logic; 
+    signal RESTART : std_logic; 
 
+    signal memory_driven_reset : std_logic; 
+    signal memory_driven_reset_or_calib_not_done : std_logic;
+    signal mem_test_ok : std_logic;
 begin
         
+    c3_rst0 <= memory_driven_reset;
 
     RESET <= not reset_button;
-               
-    vga_0: vga port map (
-       clk => c3_clk0,
-       h_sync_n => hsync,
-       v_sync_n => vsync,
-       x => x,
-       y => y,
-       blank => blank
-    );
-    
+    RESTART <= not restart_button or RESET;
+
     
     u_lpddr3 : lpddr3 generic map (
         C3_P0_MASK_SIZE => C3_P0_MASK_SIZE,
@@ -329,8 +346,8 @@ begin
 
         -- clock output.
         c3_clk0	           =>    c3_clk0,
-        -- reset
-        c3_rst0		       =>    c3_rst0,
+        -- reset output
+        c3_rst0		       =>    memory_driven_reset,
         -- calibration done
         c3_calib_done      =>    c3_calib_done,
 
@@ -386,6 +403,63 @@ begin
     );    
     
     
+    mem_test_0: mem_test port map (
+        clk  => c3_clk0,
+        reset => memory_driven_reset,
+        run => c3_calib_done,
+
+        mem_test_in_progress => LED(1),
+        mem_ok => mem_test_ok, -- LED(2),
+        mem_fail => LED(3),
+
+        cmd_en                            =>  c3_p0_cmd_en,
+        cmd_instr                         =>  c3_p0_cmd_instr,
+        cmd_bl                            =>  c3_p0_cmd_bl,
+        cmd_byte_addr                     =>  c3_p0_cmd_byte_addr,
+        cmd_empty                         =>  c3_p0_cmd_empty,
+        cmd_full                          =>  c3_p0_cmd_full,
+
+        wr_en                             =>  c3_p0_wr_en,
+        wr_mask                           =>  c3_p0_wr_mask,
+        wr_data                           =>  c3_p0_wr_data,
+        wr_full                           =>  c3_p0_wr_full,
+        wr_empty                          =>  c3_p0_wr_empty,
+        wr_count                          =>  c3_p0_wr_count,
+        wr_underrun                       =>  c3_p0_wr_underrun,
+        wr_error                          =>  c3_p0_wr_error,
+
+        rd_en                             =>  c3_p0_rd_en,
+        rd_data                           =>  c3_p0_rd_data,
+        rd_full                           =>  c3_p0_rd_full,
+        rd_empty                          =>  c3_p0_rd_empty,
+        rd_count                          =>  c3_p0_rd_count,
+        rd_overflow                       =>  c3_p0_rd_overflow,
+        rd_error                          =>  c3_p0_rd_error  
+    );    
+    
+    memory_driven_reset_or_calib_not_done <= not c3_calib_done or not mem_test_ok;
+	vga_framebuffer_0: vga_framebuffer PORT MAP(
+		clk => c3_clk0,
+        reset => memory_driven_reset_or_calib_not_done,
+		hsync => hsync,
+		vsync => vsync,
+		red => red,
+		green => green,
+		blue => blue,
+		cmd_en => c3_p1_cmd_en,
+		cmd_instr => c3_p1_cmd_instr,
+		cmd_bl => c3_p1_cmd_bl,
+		cmd_byte_addr => c3_p1_cmd_byte_addr,
+		cmd_empty => c3_p1_cmd_empty,
+		cmd_full => c3_p1_cmd_full,
+		rd_en => c3_p1_rd_en,
+		rd_data => c3_p1_rd_data,
+		rd_full => c3_p1_rd_full,
+		rd_empty => c3_p1_rd_empty,
+		rd_count => c3_p1_rd_count,
+		rd_overflow => c3_p1_rd_overflow,
+		rd_error => c3_p1_rd_error
+	);        
 
     -- disable 7 segment displays
     SevenSegmentEnable <= "111";
@@ -393,9 +467,9 @@ begin
 
     -- LED outputs
     LED(0) <= c3_calib_done;    
-    LED(1) <= '0';
-    LED(2) <= '0';
-    LED(3) <= '0';
+    --LED(1) <= '0';
+    LED(2) <= mem_test_ok;
+    --LED(3) <= '0';
     LED(4) <= '0';
     LED(5) <= '0';
     LED(6) <= '0';
@@ -403,18 +477,16 @@ begin
     
     -- disable interfaces for now.
     c3_p1_wr_en <= '0';
-    c3_p1_rd_en <= '0';
-    c3_p1_cmd_en <= '0';
+    --c3_p1_rd_en <= '0';
+    --c3_p1_cmd_en <= '0';
     
-    c3_p0_wr_en <= '0';
-    c3_p0_rd_en <= '0';
-    c3_p0_cmd_en <= '0';
+    --c3_p0_wr_en <= '0';
+    --c3_p0_rd_en <= '0';
+    --c3_p0_cmd_en <= '0';
 
 
-    -- Red, white and blue!
-    red <= "111" when blank='0' and y < 400 else "000";
-    green <= "111" when blank='0' and y>=200 and y < 400 else "000";
-    blue <= "11" when blank='0' and y >= 200 else "00";  
+
+
 
 end machine_arch;
 

@@ -677,7 +677,7 @@ begin
    rst_tmp <= not(SELFREFRESH_MODE_xilinx11) and not(PLL_LOCK_R2); -- rst_tmp becomes 1 if you lose Lock and the device is not in SUSPEND 
 
    process (UI_CLK, RST) begin
-     if (RST = '1') then
+     if (RST = '1') then        
        --Block_Reset <= '0';
        --RstCounter  <= (others => '0');
      --elsif (UI_CLK'event and UI_CLK = '1') then  

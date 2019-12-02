@@ -10,7 +10,10 @@ entity mem_test is
     generic(
         MASK_SIZE           : integer := 4;
         DATA_PORT_SIZE      : integer := 32;
-        MAX_MEMORY          : integer := 67108864
+        --MAX_MEMORY          : integer := 67108864
+        -- MAX_MEMORY          : integer := 16
+        MAX_MEMORY : integer := 1152;
+        BASE_ADDRESS : integer := 1024
     );
     port (
         clk : in std_logic;
@@ -50,12 +53,17 @@ end mem_test;
 
 architecture Behavioral of mem_test is
 
-    signal address: unsigned(29 downto 0) := (others=>'0');
+    signal address: unsigned(29 downto 0) := to_unsigned(BASE_ADDRESS, 30);
     
     type mem_test_state is ( Idle, WaitForWrQueue, WritingWrQueue, WaitForCmdQueue, WritingCmdQueue, 
                             PrepareRead, CommandRead, WaitForReadData, Done );
         
     signal state_reg: mem_test_state := Idle;
+    --constant TEST_WORD: signal(31 downto 0) := "11111010111110101111101011111010";
+    constant TEST_WORD: std_logic_vector(31 downto 0) :=   "00100100" & 
+                                                           "01001001" & 
+                                                           "01101110" & 
+                                                           "11111111";
     
 begin
     
@@ -67,7 +75,8 @@ begin
             mem_test_in_progress <= '0';
             mem_fail <= '0';
             mem_ok <= '0';
-            address <= (others=>'0');            
+            -- address <= (others=>'0');            
+            address <= to_unsigned(BASE_ADDRESS, address'length);
             wr_en <= '0';
             cmd_en <= '0';
             state_reg <= Idle;
@@ -86,14 +95,14 @@ begin
                     mem_ok <= '0';
                     mem_test_in_progress <= '0';
                     if run = '1' then
-                        state_reg <= WritingWrQueue;
+                        state_reg <= WaitForWrQueue;
                     end if;                
                     
                 when WaitForWrQueue =>
                 
                     mem_test_in_progress <= '1';
                     if wr_full = '0' and cmd_full='0' then
-                        wr_data <= "11111010111110101111101011111010";
+                        wr_data <= TEST_WORD;                        
                         wr_en <= '1';
                         state_reg <= WritingWrQueue;                        
                     end if;
@@ -118,7 +127,7 @@ begin
                     -- if to_integer(address) = 16777216 then
                     if to_integer(address) = MAX_MEMORY then
                         state_reg <= PrepareRead;
-                        address <= to_unsigned(0, address'length); --(others => '0');                        
+                        address <= to_unsigned(1024, address'length); --(others => '0');                        
                     else
                         state_reg <= WaitForWrQueue;
                     end if;
@@ -141,7 +150,8 @@ begin
                     
                     if rd_count /= "0000000" then
                         rd_en <= '1';    
-                        if rd_data /= "11111010111110101111101011111010" then
+                        if rd_data /= TEST_WORD then
+                        --if rd_ata /= (others => '0' ) then
                             mem_fail <= '1';
                             state_reg <= Done;
                         else
@@ -156,11 +166,10 @@ begin
                         end if;
                         
                     end if;
-                    
-                when Done =>
-                    mem_test_in_progress <= '0';
-                when others =>
-                    wr_en <= '0';
+                
+                when others =>                
+                -- when Done =>
+                    mem_test_in_progress <= '0';                
             end case;
 
         end if;
