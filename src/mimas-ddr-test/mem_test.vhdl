@@ -51,6 +51,7 @@ entity mem_test is
     );
 end mem_test;
 
+
 architecture Behavioral of mem_test is
 
     signal address: unsigned(29 downto 0) := to_unsigned(BASE_ADDRESS, 30);

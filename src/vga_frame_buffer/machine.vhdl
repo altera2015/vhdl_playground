@@ -76,6 +76,7 @@ entity machine is
     );
 end machine;
 
+
 architecture machine_arch of machine is
 
 	COMPONENT vga_framebuffer
@@ -99,6 +100,36 @@ architecture machine_arch of machine is
 		cmd_instr : OUT std_logic_vector(2 downto 0);
 		cmd_bl : OUT std_logic_vector(5 downto 0);
 		cmd_byte_addr : OUT std_logic_vector(29 downto 0);
+		rd_en : OUT std_logic
+		);
+	END COMPONENT;
+
+
+	COMPONENT pattern_generator
+	PORT(
+		clk : IN std_logic;
+		reset : IN std_logic;
+		cmd_empty : IN std_logic;
+		cmd_full : IN std_logic;
+		wr_full : IN std_logic;
+		wr_empty : IN std_logic;
+		wr_count : IN std_logic_vector(6 downto 0);
+		wr_underrun : IN std_logic;
+		wr_error : IN std_logic;
+		rd_data : IN std_logic_vector(31 downto 0);
+		rd_full : IN std_logic;
+		rd_empty : IN std_logic;
+		rd_count : IN std_logic_vector(6 downto 0);
+		rd_overflow : IN std_logic;
+		rd_error : IN std_logic;          
+		done : OUT std_logic;
+		cmd_en : OUT std_logic;
+		cmd_instr : OUT std_logic_vector(2 downto 0);
+		cmd_bl : OUT std_logic_vector(5 downto 0);
+		cmd_byte_addr : OUT std_logic_vector(29 downto 0);
+		wr_en : OUT std_logic;
+		wr_mask : OUT std_logic_vector(3 downto 0);
+		wr_data : OUT std_logic_vector(31 downto 0);
 		rd_en : OUT std_logic
 		);
 	END COMPONENT;
@@ -286,25 +317,23 @@ architecture machine_arch of machine is
     signal  c3_p1_rd_overflow                        : std_logic;
     signal  c3_p1_rd_error                           : std_logic;    
     
-    
-    
-    
     -- VGA Output
     signal x: unsigned(9 downto 0);
     signal y: unsigned(9 downto 0);
     signal blank: std_logic;
+
     signal RESET : std_logic;
-    signal RESTART : std_logic; 
 
     signal memory_driven_reset : std_logic; 
     signal memory_driven_reset_or_calib_not_done : std_logic;
     signal mem_test_ok : std_logic;
+    signal memory_filled_and_ready : std_logic;
+    signal pattern_generate_done: std_logic;
 begin
         
     c3_rst0 <= memory_driven_reset;
 
     RESET <= not reset_button;
-    RESTART <= not restart_button or RESET;
 
     
     u_lpddr3 : lpddr3 generic map (
@@ -402,16 +431,13 @@ begin
         c3_p1_rd_error                          =>  c3_p1_rd_error
     );    
     
-    
-    mem_test_0: mem_test port map (
+
+    pattern_generator_0: pattern_generator port map (
         clk  => c3_clk0,
-        reset => memory_driven_reset,
-        run => c3_calib_done,
-
-        mem_test_in_progress => LED(1),
-        mem_ok => mem_test_ok, -- LED(2),
-        mem_fail => LED(3),
-
+        reset => (not c3_calib_done),
+        
+        done => pattern_generate_done,
+        
         cmd_en                            =>  c3_p0_cmd_en,
         cmd_instr                         =>  c3_p0_cmd_instr,
         cmd_bl                            =>  c3_p0_cmd_bl,
@@ -437,10 +463,12 @@ begin
         rd_error                          =>  c3_p0_rd_error  
     );    
     
-    memory_driven_reset_or_calib_not_done <= not c3_calib_done or not mem_test_ok;
+    
+    memory_filled_and_ready <= not c3_calib_done or not pattern_generate_done;
+    
 	vga_framebuffer_0: vga_framebuffer PORT MAP(
 		clk => c3_clk0,
-        reset => memory_driven_reset_or_calib_not_done,
+        reset => memory_filled_and_ready,
 		hsync => hsync,
 		vsync => vsync,
 		red => red,
@@ -467,9 +495,9 @@ begin
 
     -- LED outputs
     LED(0) <= c3_calib_done;    
-    --LED(1) <= '0';
-    LED(2) <= mem_test_ok;
-    --LED(3) <= '0';
+    LED(1) <= pattern_generate_done;
+    LED(2) <= '0';
+    LED(3) <= '0';
     LED(4) <= '0';
     LED(5) <= '0';
     LED(6) <= '0';
@@ -483,10 +511,6 @@ begin
     --c3_p0_wr_en <= '0';
     --c3_p0_rd_en <= '0';
     --c3_p0_cmd_en <= '0';
-
-
-
-
 
 end machine_arch;
 
