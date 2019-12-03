@@ -65,7 +65,21 @@ architecture pattern_generator_arch of pattern_generator is
         else
             blue := "00";
         end if;
+        
+        if ( x > 300 and x < 500 ) and ( y > 150 and y < 450 ) then
+            red  := "000";
+            green := "111";
+            blue := "00";
+            
+        end if;
+        
         pixel := red & green & blue;
+        
+        --if (y mod 2) = 0 then
+        --    pixel := red & green & blue;
+        --else
+        --    pixel := "00000000";
+        --end if;
         return pixel;    
     end fill_pixel;
     

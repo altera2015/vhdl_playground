@@ -52,6 +52,7 @@ architecture vga_framebuffer_arch of vga_framebuffer is
     component vga
         generic (
             
+            
             H_VISIBLE       : integer := 800;
             H_FRONT_PORCH   : integer := 56;
             H_SYNC_PULSE    : integer := 120;
@@ -61,7 +62,6 @@ architecture vga_framebuffer_arch of vga_framebuffer is
             V_FRONT_PORCH   : integer := 37;
             V_SYNC_PULSE    : integer := 6;
             V_BACK_PORCH    : integer := 23
-            
         );
         port (
             clk      : in std_logic; -- expecting 100MHz.
