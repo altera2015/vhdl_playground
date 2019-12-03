@@ -96,7 +96,7 @@ begin
 
     blank <= '1' when x_c < H_BLANK else
              '1' when x_c >= H_WHOLE_FRAME else
-             '1' when y_c > V_WHOLE_FRAME - V_BLANK else
+             '1' when y_c >= V_WHOLE_FRAME - V_BLANK else
              '0';
 
     h_sync_n <= '0' when ( (x_c >= H_FRONT_PORCH) and (x_c <= ( H_FRONT_PORCH + H_SYNC_PULSE ))) else

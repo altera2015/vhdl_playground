@@ -12,7 +12,7 @@ entity mem_test is
         DATA_PORT_SIZE      : integer := 32;
         --MAX_MEMORY          : integer := 67108864
         -- MAX_MEMORY          : integer := 16
-        MAX_MEMORY : integer := 1152;
+        MAX_MEMORY : integer := 481024; -- 800 x 600 + BASE
         BASE_ADDRESS : integer := 1024
     );
     port (

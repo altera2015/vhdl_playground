@@ -33,6 +33,7 @@
 `define x512Mb
 `define sg5
 `define x16
+`define FULL_MEM
 
 `ifdef x128Mb                                
 `ifdef sg5                                //              Timing Parameters for -5 (CL = 3)
